@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Belmont | City Operations</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f1e9;color:#183832;font:16px "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:28px clamp(16px,4vw,56px)}header{border-bottom:2px solid #24544b;padding-bottom:16px}.mast,footer{font:600 12px Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}.mast{color:#41625a}h1{font:normal clamp(36px,5vw,66px) Georgia,serif;letter-spacing:-.045em;margin:10px 0}header p{margin:0}nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#183e36;color:white;padding:16px;border-radius:6px;margin:18px 0 0}label{display:flex;align-items:center;gap:8px}select,button{font:inherit;padding:6px 10px;border:1px solid #9cb8ad;border-radius:4px;background:white;color:#183832}button{cursor:pointer}input{accent-color:#efb67d;width:100px}#note{min-height:1.5em;color:#435951}#grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}article{background:#fffefa;border:1px solid #cccfc1;border-top:4px solid #588476;padding:16px;border-radius:5px}article:nth-child(3n+2){border-top-color:#be864e}h2{font:normal 24px Georgia,serif;margin:0 0 12px}dl{margin:0}dl div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #e6e7de}dt{font-size:14px}dd{margin:0;font:600 18px Consolas,monospace;white-space:nowrap}small{font:12px "Segoe UI",sans-serif}summary{cursor:pointer;font-size:13px;color:#346052;margin-top:8px}details p{font-size:14px}footer{margin-top:16px;line-height:1.6}@media(max-width:900px){#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){#grid{grid-template-columns:1fr}nav label{flex-wrap:wrap}}@media print{@page{size:landscape;margin:8mm}main{padding:0}#grid{grid-template-columns:repeat(3,1fr)}details,button, input{display:none}article{break-inside:avoid}*{print-color-adjust:exact}}
+</style></head><body><main>
+<header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
+<nav aria-label="Simulation controls"><label>Scenario <select id="scenario"></select></label><label>Event progression <input id="phase" type="range" min="0" max="12" value="12"></label><output id="clock"></output><button id="play">Replay</button></nav>
+<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
+<script>
+// Shared design assumptions. Replace with the signed CIRA handoff before submission.
+const design = {population:182000, homes:80000, gpcd:150, cityPeak:455, peakPue:1.34, solarCapacity:300, waterSupply:18, itLoad:40, gridImportLimit:140};
+const averageDemand = design.population * design.gpcd / 1e6;
+// Illustrative 15:00 MST end states. Water factors scale the average daily demand.
+const scenarios = {
+ spring:{name:'Spring · normal',temp:84,solar:230,city:245,pue:1.14,water:0.96,loss:4,freight:185,headway:6,delay:34,indoor:74,cooling:48,pm:15,diversion:64,collection:98,note:'Mild spring temperatures limit cooling demand while afternoon solar output remains strong.'},
+ summer:{name:'Summer · normal',temp:104,solar:240,city:300,pue:1.18,water:1.26,loss:4,freight:180,headway:6,delay:35,indoor:76,cooling:95,pm:14,diversion:64,collection:98,note:'Solar generation and grid imports cover the afternoon load.'},
+ fall:{name:'Fall · normal',temp:87,solar:190,city:258,pue:1.15,water:0.98,loss:4,freight:182,headway:6,delay:35,indoor:75,cooling:56,pm:17,diversion:64,collection:98,note:'Cooling demand eases from summer levels as shorter days reduce afternoon solar output.'},
+ winter:{name:'Winter · normal',temp:66,solar:150,city:212,pue:1.11,water:0.80,loss:4,freight:175,headway:6,delay:33,indoor:71,cooling:18,pm:12,diversion:64,collection:98,note:'Winter has the lowest afternoon cooling load and the lowest solar output of the four normal seasons.'},
+ heat:{name:'Extreme heat · 118°F',temp:118,solar:222,city:design.cityPeak,pue:design.peakPue,water:1.40,loss:4,freight:165,headway:7,delay:39,indoor:80,cooling:145,pm:23,diversion:64,collection:95,note:'Building cooling and compute overhead rise together. Storage covers demand above the grid-import limit.'},
+ dust:{name:'Extreme dust storm',temp:100,solar:120,city:294,pue:1.22,water:1.22,loss:4,freight:48,headway:14,delay:52,indoor:77,cooling:90,pm:210,diversion:64,collection:81,note:'Dust reduces solar output and visibility. Freight throughput falls as shuttles run farther apart.'}
+};
+const byId=id=>document.getElementById(id);
+const selector=byId('scenario'), slider=byId('phase'), play=byId('play');
+for(const [id,s] of Object.entries(scenarios)) selector.add(new Option(s.name,id));
+const saved=new URLSearchParams(location.hash.slice(1));
+if(Object.hasOwn(scenarios,saved.get('scenario'))) selector.value=saved.get('scenario');
+if(saved.has('step') && /^(?:[0-9]|1[0-2])$/.test(saved.get('step'))) slider.value=saved.get('step');
+const row=(label,value,unit,digits=0)=>[label,value.toFixed(digits),unit];
+function render(){
+ const end=scenarios[selector.value], step=Number(slider.value), fraction=step/12;
+ // Extreme events develop from normal summer conditions. Seasonal runs stay within their season.
+ const seasonalStart = {...end, temp:end.temp-2, solar:end.solar*1.08, city:end.city*0.98, cooling:end.cooling*0.96, water:end.water*0.98};
+ const start = ['heat','dust'].includes(selector.value) ? scenarios.summer : seasonalStart;
+ const at=key=>start[key]+fraction*(end[key]-start[key]);
+ const compute=design.itLoad*at('pue'), load=at('city')+compute;
+ const battery=Math.max(0,load-at('solar')-design.gridImportLimit);
+ const bands=[
+ ['Energy',[row('Total load',load,'MW',1),row('Municipal load',at('city'),'MW',1),row('Solar output',at('solar'),'MW',1),row('Battery discharge',battery,'MW',1),row('Grid imports',load-at('solar')-battery,'MW',1)],'Total load adds municipal and compute loads. Imports are capped at '+design.gridImportLimit+' MW. Battery discharge is the power required to balance the model. Installed battery capacity remains to be sized.'],
+ ['Water',[row('Demand rate',averageDemand*at('water'),'MGD',1),row('Average daily demand',averageDemand,'MGD',1),row('Supply placeholder',design.waterSupply,'MGD',1),row('Distribution loss',at('loss'),'%',1)],'MGD means million gallons per day. Demand is a flow rate. The 18 MGD supply placeholder is 9.3 MGD below average demand. CIRA supply sizing is pending.'],
+ ['Mobility',[row('Freight throughput',at('freight'),'trucks/h'),row('Shuttle headway',at('headway'),'min',1),row('C-V2X latency',at('delay'),'ms')],'Freight uses a proposed I-11 logistics corridor. Headway is the interval between neighborhood shuttles. Latency models vehicle-to-infrastructure message delivery.'],
+ ['Data / Compute',[row('Facility power',compute,'MW',1),row('Power usage effectiveness',at('pue'),'ratio',2),row('Site cooling WUE',0,'L/kWh',2)],'PUE divides facility power by the fixed '+design.itLoad+' MW IT load. The dry heat-rejection design assumes zero operational cooling-water consumption onsite per IT kWh. Electrical generation and construction water are outside this boundary.'],
+ ['Bioclimatic buildings',[row('Outdoor temperature',at('temp'),'°F',1),row('Indoor temperature',at('indoor'),'°F',1),row('Building cooling load',at('cooling'),'MW',1)],'Indoor temperature represents a modeled occupied building. District building cooling electricity is already included in municipal load.'],
+ ['Circular waste / Air quality',[row('Ambient PM₁₀',at('pm'),'µg/m³'),row('Waste diversion',at('diversion'),'%'),row('Collection on schedule',at('collection'),'%')],'PM₁₀ is the modeled ambient concentration of airborne particles up to 10 µm. Waste diversion is the share diverted from disposal. Collection measures the share of scheduled stops on time.']
+ ];
+ const grid=byId('grid');
+ if(!grid.children.length) for(const [name,rows,info] of bands){
+   const article=document.createElement('article');
+   article.innerHTML='<h2>'+name+'</h2><dl>'+rows.map(([label])=>'<div><dt>'+label+'</dt><dd></dd></div>').join('')+'</dl><details><summary>Metric notes</summary><p>'+info+'</p></details>';
+   grid.append(article);
+ }
+ bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
+ byId('clock').textContent=(step===12?'15:00':'14:'+String(step*5).padStart(2,'0'))+' MST';
+ byId('note').textContent=end.note;
+ byId('basis').textContent='Design basis · '+design.population.toLocaleString('en-US')+' residents · '+design.homes.toLocaleString('en-US')+' homes · '+design.gpcd+' GPCD · '+averageDemand+' MGD average demand · '+Math.round(design.cityPeak+design.itLoad*design.peakPue)+' MW combined planning peak';
+ const hash='#scenario='+selector.value+'&step='+step;
+ if(location.hash!==hash) location.replace(hash);
+}
+let timer;
+function stop(){clearInterval(timer);timer=null;play.textContent=Number(slider.value)===12?'Replay':'Play'}
+function update(){stop();render()}
+selector.onchange=()=>{slider.value=12;update()}; slider.oninput=update;
+play.onclick=()=>{if(timer){stop();return}if(Number(slider.value)===12)slider.value=0;render();play.textContent='Pause';timer=setInterval(()=>{slider.value=Number(slider.value)+1;render();if(Number(slider.value)===12)stop()},900)};
+update();
+</script></main></body></html>
