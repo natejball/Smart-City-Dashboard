@@ -4,10 +4,11 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f4f1e9;color:#183832;font:16px "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:28px clamp(16px,4vw,56px)}header{border-bottom:2px solid #24544b;padding-bottom:16px}.mast,footer{font:600 12px Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}.mast{color:#41625a}h1{font:normal clamp(36px,5vw,66px) Georgia,serif;letter-spacing:-.045em;margin:10px 0}header p{margin:0}nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#183e36;color:white;padding:16px;border-radius:6px;margin:18px 0 0}label{display:flex;align-items:center;gap:8px}select,button{font:inherit;padding:6px 10px;border:1px solid #9cb8ad;border-radius:4px;background:white;color:#183832}button{cursor:pointer}input{accent-color:#efb67d;width:100px}#note{min-height:1.5em;color:#435951}#grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}article{background:#fffefa;border:1px solid #cccfc1;border-top:4px solid #588476;padding:16px;border-radius:5px}article:nth-child(3n+2){border-top-color:#be864e}h2{font:normal 24px Georgia,serif;margin:0 0 12px}dl{margin:0}dl div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #e6e7de}dt{font-size:14px}dd{margin:0;font:600 18px Consolas,monospace;white-space:nowrap}small{font:12px "Segoe UI",sans-serif}summary{cursor:pointer;font-size:13px;color:#346052;margin-top:8px}details p{font-size:14px}footer{margin-top:16px;line-height:1.6}@media(max-width:900px){#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){#grid{grid-template-columns:1fr}nav label{flex-wrap:wrap}}@media print{@page{size:landscape;margin:8mm}main{padding:0}#grid{grid-template-columns:repeat(3,1fr)}details,button, input{display:none}article{break-inside:avoid}*{print-color-adjust:exact}}
 #tabs{display:flex;gap:6px;margin-bottom:12px}#tabs button[aria-pressed=true]{background:#183e36;color:white}#lab h2{margin-top:16px}.designs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px}.designs label{display:flex;justify-content:space-between;margin:10px 0}.designs select{width:100px}.result{font:600 22px Georgia,serif;color:#184f40;border-top:1px solid #ccd5c8;padding-top:14px}.chart{overflow-x:auto}.chart canvas{width:100%;height:auto;max-height:235px;background:#fffefa;border:1px solid #c9cfc3}#lab{background:linear-gradient(130deg,#e0ebe4,#f6ead7);padding:20px;border-radius:8px}article{background:rgba(255,254,250,.92)}[hidden]{display:none!important}
+main{position:relative}header{position:relative;isolation:isolate;overflow:hidden;border-radius:12px 12px 0 0;padding:26px clamp(14px,3vw,36px) 65px;background:#e4d7be}#horizon{position:absolute;inset:0;width:100%;height:100%;z-index:-2}header:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#fff5dfed,transparent 79%)}nav{position:relative;margin:-38px 12px 12px;border:1px solid #ffffffba;background:linear-gradient(125deg,#173d35e8,#36594dcf 55%,#55716ad9);backdrop-filter:blur(16px) saturate(1.4);box-shadow:inset 0 1px 2px #ffffff9c,0 4px 12px #213b3024;border-radius:14px}nav:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(ellipse at var(--shine,20%) 0%,#ffffff28,transparent 45%)}.pack{width:100%;height:156px;display:block;background:radial-gradient(ellipse at 50% 86%,#42645b,#1a3631 76%);border-radius:9px}.pack-info{font:600 14px Consolas,monospace;margin:8px 0}.pack-meter{width:100%;accent-color:#207767}.rotate{font-size:13px;margin:2px 0 8px}body.capture nav,body.capture #tabs,body.capture #capture,body.capture .rotate,body.capture #share{display:none}body.capture header{padding-bottom:24px}body.capture article{background:#fffefa}@media print{nav,#tabs,#capture,.rotate{display:none!important}header{padding-bottom:20px}}@media(max-width:600px){nav{margin-left:3px;margin-right:3px}}
 </style></head><body><main>
-<div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
+<div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button><button id="capture">Report view</button></div><header><canvas id="horizon" aria-hidden="true"></canvas><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
 <nav aria-label="Simulation controls"><label>Scenario <select id="scenario"></select></label><label>Event progression <input id="phase" type="range" min="0" max="12" value="12"></label><output id="clock"></output><button id="play">Replay</button></nav>
-<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><p>Design A · solid teal &nbsp; / &nbsp; Design B · dashed rust</p><div class="chart"><canvas id="chart" width="880" height="220" aria-label="Unmet power in megawatts. Exact results are listed above."></canvas></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
+<button id="restore" hidden>Exit report view</button><p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><p>Design A · solid teal &nbsp; / &nbsp; Design B · dashed rust</p><div class="chart"><canvas id="chart" width="880" height="220" aria-label="Unmet power in megawatts. Exact results are listed above."></canvas></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
 <script>
 // Shared design assumptions. Replace with the signed CIRA handoff before submission.
 const design = {population:182000, homes:80000, gpcd:150, cityPeak:455, peakPue:1.34, solarCapacity:300, waterSupply:18, itLoad:40, gridImportLimit:140};
@@ -51,8 +52,14 @@ const designs=['A','B'].map((name,i)=>{
   select.value=stored!==null && values.includes(Number(stored))?Number(stored):[[100,100,100],[150,100,100]][i][j];
   select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);card.append(field);return select;
  });
+ const pack=document.createElement('canvas');pack.className='pack';pack.setAttribute('aria-label','Battery enclosure showing remaining stored energy');
+ const info=document.createElement('p');info.className='pack-info';
+ const meter=document.createElement('progress');meter.className='pack-meter';meter.setAttribute('aria-label','Instantaneous discharge relative to rating');
+ const rotate=document.createElement('button');rotate.className='rotate';rotate.textContent='Rotate enclosure';
+ card.append(pack,info,meter,rotate);
+ const view={angle:-0.52};rotate.onclick=()=>{view.angle+=Math.PI/6;render()};
  const output=document.createElement('div');card.append(output);byId('designs').append(card);
- return {name,controls,output};
+ return {name,controls,output,pack,info,meter,view};
 });
 function dispatch(designCase,series,cursor){
  const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
@@ -64,10 +71,14 @@ function dispatch(designCase,series,cursor){
   if(m){remaining=Math.max(0,remaining-delivered/60);unserved+=gap/60}
   if(gap>0.00001 && first===null)first=m;
   peak=Math.max(peak,gap);gaps.push(gap);
-  if(m===cursor)current={gap,remaining};
+  if(m===cursor)current={gap,remaining,delivered};
  });
  const time=m=>m===60?'15:00':'14:'+String(m).padStart(2,'0');
  designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved</p><p>Full-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p>At '+time(cursor)+' · '+current.gap.toFixed(1)+' MW unmet · '+current.remaining.toFixed(1)+' MWh remaining</p>';
+ const fraction=capacity?current.remaining/capacity:0;
+ drawPack(designCase.pack,designCase.view.angle,fraction);
+ designCase.info.textContent=current.remaining.toFixed(1)+' / '+capacity+' MWh stored · '+current.delivered.toFixed(1)+' / '+power+' MW output';
+ designCase.meter.max=power||1;designCase.meter.value=current.delivered;
  return gaps;
 }
 function drawChart(lines,cursor){
@@ -82,6 +93,7 @@ function drawChart(lines,cursor){
 function render(){
  const step=Number(slider.value),id=selector.value;
  const {end,at,compute,load,battery}=sample(id,step*5);
+ drawDesert(id,step);
  byId('grid').hidden=lab;byId('lab').hidden=!lab;
  byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
  document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
@@ -117,6 +129,60 @@ function render(){
 byId('opsTab').onclick=()=>{lab=false;update()};
 byId('labTab').onclick=()=>{lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
+// Scale the drawing surface to its layout width on high-density screens.
+function surface(canvas){
+ const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight),ratio=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);
+ const ctx=canvas.getContext('2d');ctx.scale(ratio,ratio);return {ctx,w,h};
+}
+function face(ctx,points,color){
+ ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=color;ctx.fill();
+}
+const still=matchMedia('(prefers-reduced-motion: reduce)');
+function drawDesert(id,step){
+ const {ctx,w,h}=surface(byId('horizon')),t=still.matches?0:step/12;
+ const dust=id==='dust',hot=id==='heat';
+ const sky=ctx.createLinearGradient(0,0,0,h);
+ sky.addColorStop(0,id==='winter'?'#8eb2c2':'#96b9bb');sky.addColorStop(.67,hot?'#f7c996':'#f3d6ac');sky.addColorStop(1,'#ba8063');
+ ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+ ctx.fillStyle='#fff0c4';ctx.beginPath();ctx.arc(w*(.78+t*.012),h*.24,h*.095,0,2*Math.PI);ctx.fill();
+ // Project ridges in layers. Adjacent triangular facets share their vertices.
+ for(let layer=0;layer<4;layer++){
+  const pts=[],base=h*(.50+layer*.12);
+  for(let i=-1;i<=41;i++){
+   const noise=Math.sin(i*.49+layer*2)+.44*Math.cos(i*1.83+layer)+.28*Math.sin(i*2.72);
+   const shimmer=hot?Math.sin(t*11+i)*t*1.5:0;
+   pts.push([i*w/40,base-noise*h*(.052+layer*.008)+shimmer]);
+  }
+  face(ctx,[...pts,[w,h],[0,h]],['#ad9f96','#a98375','#8b7161','#746453'][layer]);
+  for(let i=1;i<pts.length;i++)face(ctx,[pts[i-1],pts[i],[(pts[i][0]+pts[i-1][0])/2+8,base+h*.20]],'rgba(62,48,45,'+(.04+.09*Math.abs(Math.sin(i*3+layer)))+')');
+ }
+ if(dust){const front=w*(1.12-.83*(still.matches ? 0.65 : t));for(let i=0;i<16;i++){const x=front+i*w*.058,y=h*(.54+.13*Math.sin(i*2)),r=h*(.43+.1*Math.cos(i));const cloud=ctx.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,'#b38b54db');cloud.addColorStop(1,'#b38b5400');ctx.fillStyle=cloud;ctx.fillRect(x-r,y-r,2*r,2*r)}}
+}
+function drawPack(canvas,angle,charge){
+ const {ctx,w,h}=surface(canvas),scale=Math.min(w/8,h/3.7);
+ const project=([x,y,z])=>[w/2+(x*Math.cos(angle)-z*Math.sin(angle))*scale,h*.59+(x*Math.sin(angle)+z*Math.cos(angle))*scale*.37-y*scale];
+ const faces=[];
+ function box(x,y,z,sx,sy,sz,colors){
+  const p=[[x,y,z],[x+sx,y,z],[x+sx,y,z+sz],[x,y,z+sz]];
+  p.push(...p.map(([a,b,c])=>[a,b+sy,c]));
+  for(const [side,indices] of [[0,[0,1,5,4]],[1,[1,2,6,5]],[0,[2,3,7,6]],[1,[3,0,4,7]],[2,[4,5,6,7]]]){
+   const corners=indices.map(i=>p[i]);
+   faces.push({points:corners.map(project),color:colors[side],depth:corners.reduce((d,[a,b,c])=>d+a*Math.sin(angle)+c*Math.cos(angle)+b*.37,0)/4});
+  }
+ }
+ box(-2.55,-.4,-.95,5.1,.24,1.9,['#77918a','#637d76','#c6d7c9']);
+ for(let i=0;i<10;i++){
+  const x=-2.38+i*.48,fill=Math.min(1,Math.max(0,charge*10-i));
+  box(x,-.15,-.74,.39,.98,1.48,['#405954','#546a63','#768880']);
+  if(fill>0)box(x-.006,-.15,-.75,.40,.98*fill,1.50,['#45b89e','#308d7a','#99e3be']);
+ }
+ faces.sort((a,b)=>a.depth-b.depth).forEach(f=>face(ctx,f.points,f.color));
+}
+function report(on){stop();document.body.classList.toggle('capture',on);byId('restore').hidden=!on;render()}
+byId('capture').onclick=()=>report(true);byId('restore').onclick=()=>report(false);
+document.querySelector('nav').onpointermove=e=>{if(!still.matches&&timer){const nav=e.currentTarget;nav.style.setProperty('--shine',100*(e.clientX-nav.getBoundingClientRect().left)/nav.clientWidth+'%')}};
+window.addEventListener('resize',render);
 let timer;
 function stop(){clearInterval(timer);timer=null;play.textContent=Number(slider.value)===12?'Replay':'Play'}
 function update(){stop();render()}
