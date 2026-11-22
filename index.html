@@ -3,10 +3,11 @@
 <title>Belmont | City Operations</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f4f1e9;color:#183832;font:16px "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:28px clamp(16px,4vw,56px)}header{border-bottom:2px solid #24544b;padding-bottom:16px}.mast,footer{font:600 12px Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}.mast{color:#41625a}h1{font:normal clamp(36px,5vw,66px) Georgia,serif;letter-spacing:-.045em;margin:10px 0}header p{margin:0}nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#183e36;color:white;padding:16px;border-radius:6px;margin:18px 0 0}label{display:flex;align-items:center;gap:8px}select,button{font:inherit;padding:6px 10px;border:1px solid #9cb8ad;border-radius:4px;background:white;color:#183832}button{cursor:pointer}input{accent-color:#efb67d;width:100px}#note{min-height:1.5em;color:#435951}#grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}article{background:#fffefa;border:1px solid #cccfc1;border-top:4px solid #588476;padding:16px;border-radius:5px}article:nth-child(3n+2){border-top-color:#be864e}h2{font:normal 24px Georgia,serif;margin:0 0 12px}dl{margin:0}dl div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #e6e7de}dt{font-size:14px}dd{margin:0;font:600 18px Consolas,monospace;white-space:nowrap}small{font:12px "Segoe UI",sans-serif}summary{cursor:pointer;font-size:13px;color:#346052;margin-top:8px}details p{font-size:14px}footer{margin-top:16px;line-height:1.6}@media(max-width:900px){#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){#grid{grid-template-columns:1fr}nav label{flex-wrap:wrap}}@media print{@page{size:landscape;margin:8mm}main{padding:0}#grid{grid-template-columns:repeat(3,1fr)}details,button, input{display:none}article{break-inside:avoid}*{print-color-adjust:exact}}
+#tabs{display:flex;gap:6px;margin-bottom:12px}#tabs button[aria-pressed=true]{background:#183e36;color:white}#lab h2{margin-top:16px}.designs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px}.designs label{display:flex;justify-content:space-between;margin:10px 0}.designs select{width:100px}.result{font:600 22px Georgia,serif;color:#184f40;border-top:1px solid #ccd5c8;padding-top:14px}.chart{overflow-x:auto}.chart canvas{width:100%;height:auto;max-height:235px;background:#fffefa;border:1px solid #c9cfc3}#lab{background:linear-gradient(130deg,#e0ebe4,#f6ead7);padding:20px;border-radius:8px}article{background:rgba(255,254,250,.92)}[hidden]{display:none!important}
 </style></head><body><main>
-<header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
+<div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
 <nav aria-label="Simulation controls"><label>Scenario <select id="scenario"></select></label><label>Event progression <input id="phase" type="range" min="0" max="12" value="12"></label><output id="clock"></output><button id="play">Replay</button></nav>
-<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
+<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><p>Design A · solid teal &nbsp; / &nbsp; Design B · dashed rust</p><div class="chart"><canvas id="chart" width="880" height="220" aria-label="Unmet power in megawatts. Exact results are listed above."></canvas></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
 <script>
 // Shared design assumptions. Replace with the signed CIRA handoff before submission.
 const design = {population:182000, homes:80000, gpcd:150, cityPeak:455, peakPue:1.34, solarCapacity:300, waterSupply:18, itLoad:40, gridImportLimit:140};
@@ -27,14 +28,69 @@ const saved=new URLSearchParams(location.hash.slice(1));
 if(Object.hasOwn(scenarios,saved.get('scenario'))) selector.value=saved.get('scenario');
 if(saved.has('step') && /^(?:[0-9]|1[0-2])$/.test(saved.get('step'))) slider.value=saved.get('step');
 const row=(label,value,unit,digits=0)=>[label,value.toFixed(digits),unit];
-function render(){
- const end=scenarios[selector.value], step=Number(slider.value), fraction=step/12;
+function sample(id,minute){
+ const end=scenarios[id], fraction=minute/60;
  // Extreme events develop from normal summer conditions. Seasonal runs stay within their season.
  const seasonalStart = {...end, temp:end.temp-2, solar:end.solar*1.08, city:end.city*0.98, cooling:end.cooling*0.96, water:end.water*0.98};
- const start = ['heat','dust'].includes(selector.value) ? scenarios.summer : seasonalStart;
+ const start = ['heat','dust'].includes(id) ? scenarios.summer : seasonalStart;
  const at=key=>start[key]+fraction*(end[key]-start[key]);
  const compute=design.itLoad*at('pue'), load=at('city')+compute;
  const battery=Math.max(0,load-at('solar')-design.gridImportLimit);
+ return {end,at,compute,load,battery};
+}
+let lab=saved.get('view')==='lab';
+const options=[['Power limit (MW)',[0,50,100,150,200]],['Usable energy (MWh)',[0,25,50,100,200]],['Starting charge (%)',[0,25,50,75,100]]];
+const designs=['A','B'].map((name,i)=>{
+ const card=document.createElement('article');
+ card.innerHTML='<h2>Design '+name+'</h2>';
+ const controls=options.map(([label,values],j)=>{
+  const field=document.createElement('label'), select=document.createElement('select');
+  field.textContent=label;
+  values.forEach(v=>select.add(new Option(v,v)));
+  const key=name+j, stored=saved.get(key);
+  select.value=stored!==null && values.includes(Number(stored))?Number(stored):[[100,100,100],[150,100,100]][i][j];
+  select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);card.append(field);return select;
+ });
+ const output=document.createElement('div');card.append(output);byId('designs').append(card);
+ return {name,controls,output};
+});
+function dispatch(designCase,series,cursor){
+ const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
+ let remaining=capacity*charge/100,unserved=0,first=null,peak=0;
+ const gaps=[];let current;
+ series.forEach((s,m)=>{
+  const delivered=Math.min(s.battery,power,m?remaining*60:(remaining>0?power:0));
+  const gap=Math.max(0,s.battery-delivered);
+  if(m){remaining=Math.max(0,remaining-delivered/60);unserved+=gap/60}
+  if(gap>0.00001 && first===null)first=m;
+  peak=Math.max(peak,gap);gaps.push(gap);
+  if(m===cursor)current={gap,remaining};
+ });
+ const time=m=>m===60?'15:00':'14:'+String(m).padStart(2,'0');
+ designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved</p><p>Full-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p>At '+time(cursor)+' · '+current.gap.toFixed(1)+' MW unmet · '+current.remaining.toFixed(1)+' MWh remaining</p>';
+ return gaps;
+}
+function drawChart(lines,cursor){
+ const ctx=byId('chart').getContext('2d'), top=Math.max(20,Math.ceil(Math.max(...lines.flat())/20)*20);
+ const x=m=>62+m*13, y=v=>178-148*v/top;
+ ctx.clearRect(0,0,880,220);ctx.font='14px Arial';ctx.fillStyle='#183832';
+ for(const v of [0,top/2,top]){ctx.fillText(v+' MW',4,y(v)+4);ctx.fillRect(62,y(v),780,0.5)}
+ for(const [m,t] of [[0,'14:00'],[30,'14:30'],[60,'15:00 MST']])ctx.fillText(t,x(m)-24,205);
+ lines.forEach((line,i)=>{ctx.beginPath();ctx.setLineDash(i?[8,5]:[]);ctx.strokeStyle=i?'#a34622':'#197065';ctx.lineWidth=3;line.forEach((v,m)=>m?ctx.lineTo(x(m),y(v)):ctx.moveTo(x(m),y(v)));ctx.stroke()});
+ ctx.setLineDash([]);ctx.fillRect(x(cursor),20,1,158);
+}
+function render(){
+ const step=Number(slider.value),id=selector.value;
+ const {end,at,compute,load,battery}=sample(id,step*5);
+ byId('grid').hidden=lab;byId('lab').hidden=!lab;
+ byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
+ document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
+ document.title='Belmont | '+document.querySelector('h1').textContent;
+ if(lab){
+  byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
+  const series=Array.from({length:61},(_,m)=>sample(id,m));
+  drawChart(designs.map(d=>dispatch(d,series,step*5)),step*5);
+ }
  const bands=[
  ['Energy',[row('Total load',load,'MW',1),row('Municipal load',at('city'),'MW',1),row('Solar output',at('solar'),'MW',1),row('Battery discharge',battery,'MW',1),row('Grid imports',load-at('solar')-battery,'MW',1)],'Total load adds municipal and compute loads. Imports are capped at '+design.gridImportLimit+' MW. Battery discharge is the power required to balance the model. Installed battery capacity remains to be sized.'],
  ['Water',[row('Demand rate',averageDemand*at('water'),'MGD',1),row('Average daily demand',averageDemand,'MGD',1),row('Supply placeholder',design.waterSupply,'MGD',1),row('Distribution loss',at('loss'),'%',1)],'MGD means million gallons per day. Demand is a flow rate. The 18 MGD supply placeholder is 9.3 MGD below average demand. CIRA supply sizing is pending.'],
@@ -53,9 +109,14 @@ function render(){
  byId('clock').textContent=(step===12?'15:00':'14:'+String(step*5).padStart(2,'0'))+' MST';
  byId('note').textContent=end.note;
  byId('basis').textContent='Design basis · '+design.population.toLocaleString('en-US')+' residents · '+design.homes.toLocaleString('en-US')+' homes · '+design.gpcd+' GPCD · '+averageDemand+' MGD average demand · '+Math.round(design.cityPeak+design.itLoad*design.peakPue)+' MW combined planning peak';
- const hash='#scenario='+selector.value+'&step='+step;
+ let hash='#scenario='+selector.value+'&step='+step;
+ if(lab)hash+='&view=lab';
+ for(const d of designs)d.controls.forEach((el,j)=>{if(lab||saved.has(d.name+j)||el.dataset.changed)hash+='&'+d.name+j+'='+el.value});
  if(location.hash!==hash) location.replace(hash);
 }
+byId('opsTab').onclick=()=>{lab=false;update()};
+byId('labTab').onclick=()=>{lab=true;update()};
+byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
 let timer;
 function stop(){clearInterval(timer);timer=null;play.textContent=Number(slider.value)===12?'Replay':'Play'}
 function update(){stop();render()}
