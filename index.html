@@ -80,12 +80,29 @@ body.capture{background:#fff}
 #domainStudy{padding:clamp(12px,2vw,24px);border:1px solid #fff9;border-radius:12px;background:#faf9efac;backdrop-filter:blur(5px);margin-bottom:12px}
 #domainStudy label{flex-wrap:wrap;margin:12px 0}#domainStudy .table-wrap{overflow-x:auto}#domainStudy table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#domainStudy th,#domainStudy td{padding:9px 5px;text-align:start;border-bottom:1px solid #3145393b}#domainStudy th{font-weight:600}#trend{display:block;width:100%;height:176px}#trend text{font:12px 'Segoe UI',sans-serif;fill:#193734}
 @media print{#domainBar,#domainStudy label{display:none}#domainStudy{background:white}}
+#overview,#referenceControl,#waterExperiment{background:#faf9efb8;border:1px solid #ffffffac;border-radius:12px;padding:clamp(12px,2vw,20px);backdrop-filter:blur(5px)}
+#referenceControl{width:fit-content;max-width:100%;margin:8px 0;flex-wrap:wrap;padding:8px 12px}#overview{margin:10px 0}
+#overview table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#overview td,#overview th{padding:10px 6px;text-align:left;border-bottom:1px solid #3145393b}#overview th{font-weight:600}
+#overview button{display:block;width:100%;text-align:left;color:#174a43;background:transparent;border:0;padding:5px;text-decoration:underline;text-underline-offset:3px}
+#overview small{display:block;font-size:.85em;color:#324d46}#waterExperiment{margin:12px 0;background:#fffdf36b;backdrop-filter:none}
+#waterExperiment h3{margin:0 0 8px}#reduction{width:min(100%,420px);display:block;margin:6px 0 14px}
+.water-bars{max-width:640px;font-variant-numeric:tabular-nums}.water-bars>div:not(.water-track){display:flex;justify-content:space-between;gap:10px}.water-track{position:relative;height:10px;background:#293b3520;border-radius:3px;margin:5px 0 12px}.water-track i{height:100%;display:block;background:#54706c;border-radius:3px}#adjustedBar{background:#00766b}.water-track:after{content:'';position:absolute;top:-3px;bottom:-3px;left:var(--supply);border-left:2px solid #312f25}#waterOutcome{margin-bottom:0}
+@media(max-width:520px){#overview td,#overview th{padding:6px 3px;font-size:14px}#overview button{font-size:14px}}
+@media print{#referenceControl,#reduction{display:none}#overview,#waterExperiment{background:white;break-inside:avoid}}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="60" value="60"></label><output id="clock"></output><button id="play">Replay</button></nav>
-<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="60"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
+<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
+<section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
+<table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
+<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="60"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
 <h2 id="studyTitle"></h2><p id="finding"></p>
-<label>Compare with <select id="compare"></select></label>
+<section id="waterExperiment" hidden><h3>Water conservation experiment</h3>
+<label for="reduction">Hypothetical demand reduction <output id="reductionValue" for="reduction"></output></label>
+<input id="reduction" type="range" min="0" max="100" value="10" step="1">
+<div class="water-bars"><div><span>Original demand</span><strong id="originalWater"></strong></div><div class="water-track"><i id="originalBar"></i></div>
+<div><span>Adjusted demand</span><strong id="adjustedWater"></strong></div><div class="water-track"><i id="adjustedBar"></i></div></div>
+<p id="waterOutcome"></p></section>
 <div class="table-wrap"><table><thead><tr><th scope="col">Metric</th><th scope="col" id="currentName"></th><th scope="col" id="refName"></th></tr></thead><tbody id="studyRows"></tbody></table></div>
 <label>Plot metric <select id="metric"></select></label>
 <div class="chart-key"><span>Selected scenario</span><span>Comparison</span></div><svg id="trend" role="img"></svg>
@@ -259,18 +276,59 @@ function domainReadings({at,compute,load,battery}){
 }
 const domainIds=['energy','water','mobility','compute','buildings','waste'];
 const domainNames=['Energy','Water','Mobility','Data / Compute','Bioclimatic buildings','Circular waste / Air quality'];
-let domain=domainIds.includes(saved.get('domain'))?saved.get('domain'):'energy';
+const labViews=['overview',...domainIds];
+let domain=labViews.includes(saved.get('domain'))?saved.get('domain'):(lab?'energy':'overview');
+const reduction=byId('reduction');
+if(/^(?:100|[1-9]?[0-9])$/.test(saved.get('reduction')))reduction.value=saved.get('reduction');
+reduction.oninput=update;
 const compare=byId('compare'),metric=byId('metric');
 for(const [key,scenario] of Object.entries(scenarios))compare.add(new Option(scenario.name,key));
 compare.value=Object.hasOwn(scenarios,saved.get('compare'))?saved.get('compare'):'summer';
 const choices={};
 if(/^\d$/.test(saved.get('metric')))choices[domain]=Number(saved.get('metric'));
-for(const [i,key] of domainIds.entries()){
- const button=document.createElement('button');button.value=key;button.textContent=domainNames[i];
+for(const key of labViews){
+ const button=document.createElement('button');button.value=key;button.textContent=key==='overview'?'Overview':domainNames[domainIds.indexOf(key)];
  button.onclick=()=>{domain=key;update()};byId('domainBar').append(button);
 }
 compare.onchange=update;
 metric.onchange=()=>{choices[domain]=metric.selectedIndex;update()};
+const overviewMetrics=[2,0,0,0,2,0];
+for(const [i,key] of domainIds.entries()){
+ const tr=byId('overviewRows').insertRow(),header=document.createElement('th');
+ header.scope='row';tr.append(header);
+ const button=document.createElement('button'),caption=document.createElement('small');
+ button.type='button';button.append(domainNames[i],caption);header.append(button);
+ button.onclick=()=>{
+  domain=key;choices[key]=overviewMetrics[i];metric.dataset.domain='';
+  update();byId('domainBar').querySelector('[value="'+key+'"]').focus();
+ };
+ tr.insertCell();tr.insertCell();
+}
+function renderOverview(id,minute,bands){
+ const ref=compare.value,reference=domainReadings(sample(ref,minute));
+ byId('overviewTitle').textContent='Scenario overview · '+time(minute)+' MST';
+ byId('overviewCurrent').textContent=scenarios[id].name;
+ byId('overviewRef').textContent=scenarios[ref].name+' (reference)';
+ overviewMetrics.forEach((j,i)=>{
+  const [label,value,unit]=bands[i][1][j],tr=byId('overviewRows').rows[i];
+  tr.querySelector('small').textContent=label;
+  tr.cells[1].textContent=value+' '+unit;
+  tr.cells[2].textContent=reference[i][1][j][1]+' '+unit;
+ });
+}
+function renderConservation(demand){
+ const percent=Number(reduction.value),adjusted=demand*(1-percent/100),supply=design.waterSupply;
+ byId('reductionValue').textContent=percent+'%';
+ reduction.setAttribute('aria-valuetext',percent+' percent');
+ byId('originalWater').textContent=demand.toFixed(1)+' MGD';
+ byId('adjustedWater').textContent=adjusted.toFixed(1)+' MGD';
+ const scale=Math.max(demand,supply);
+ for(const [id,value] of [['originalBar',demand],['adjustedBar',adjusted]])byId(id).style.width=100*value/scale+'%';
+ byId('waterExperiment').style.setProperty('--supply',100*supply/scale+'%');
+ const gap=Math.max(0,adjusted-supply);
+ byId('waterOutcome').textContent='At the provisional supply of '+supply+' MGD (vertical mark), the original gap is '+Math.max(0,demand-supply).toFixed(1)+' MGD. '
+  +(gap>0?'With conservation, '+gap.toFixed(1)+' MGD remains unmet.':'Adjusted demand is covered, with '+(supply-adjusted).toFixed(1)+' MGD to spare.');
+}
 function finding(key,{at,compute},baseline){
  switch(key){
  case 'water':return 'Modeled demand is '+(averageDemand*at('water')).toFixed(1)+' MGD against a provisional supply of '+design.waterSupply+' MGD. The estimated gap is '+Math.max(0,averageDemand*at('water')-design.waterSupply).toFixed(1)+' MGD.';
@@ -327,7 +385,9 @@ function render(){
  document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
  document.title='Belmont | '+document.querySelector('h1').textContent;
  byId('testLoad').hidden=lab;
- byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=domain==='energy';
+ byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=['energy','overview'].includes(domain);
+ byId('overview').hidden=domain!=='overview';byId('referenceControl').hidden=domain==='energy';
+ byId('waterExperiment').hidden=domain!=='water';
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
  if(lab && domain==='energy'){
   byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
@@ -335,7 +395,9 @@ function render(){
   drawChart(designs.map(d=>dispatch(d,series,minute)),minute);
  }
  const bands=domainReadings(frame);
- if(lab && domain!=='energy')renderStudy(id,minute,bands);
+ if(lab && domain==='overview')renderOverview(id,minute,bands);
+ if(lab && !byId('domainStudy').hidden)renderStudy(id,minute,bands);
+ if(lab && domain==='water')renderConservation(averageDemand*at('water'));
  const grid=byId('grid');
  if(!grid.children.length) for(const [name,rows,info] of bands){
    const article=document.createElement('article');
@@ -350,13 +412,15 @@ function render(){
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
  if(lab)hash+='&view=lab';
- if(lab && domain!=='energy')hash+='&domain='+domain+'&compare='+compare.value+'&metric='+metric.value;
+ if(lab)hash+='&domain='+domain+'&compare='+compare.value;
+ if(lab && !byId('domainStudy').hidden)hash+='&metric='+metric.value;
+ if(lab && (domain==='water'||reduction.value!=='10'))hash+='&reduction='+reduction.value;
  for(const d of designs)d.controls.forEach((el,j)=>{if(lab||saved.has(d.name+j)||el.dataset.changed)hash+='&'+d.name+j+'='+el.value});
  if(location.hash!==hash) location.replace(hash);
 }
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{lab=false;update()};
-byId('labTab').onclick=()=>{lab=true;update()};
+byId('labTab').onclick=()=>{if(!lab)domain='overview';lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
 // Scale the drawing surface to its layout width on high-density screens.
 function surface(canvas){
