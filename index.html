@@ -98,7 +98,7 @@ body.capture{background:#fff}
 #waterForm label{display:flex;justify-content:space-between;gap:12px;margin:12px 0}#waterForm input{font:inherit;min-width:0;width:42%;max-width:220px;padding:6px;border:1px solid #72857a;border-radius:5px;background:#fffdf4}.water-summary dl div{align-items:baseline}.water-summary dd{white-space:normal;text-align:right;font-size:16px}.water-summary progress{width:100%;accent-color:#007d83}.water-actions,.water-key{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:10px 0}.water-key span{display:inline-flex;align-items:center;gap:6px}.water-key i{width:16px;height:9px;border-radius:2px}.water-stack .chart>svg{height:186px}.water-stack details{margin-top:12px}.water-summary h3,.water-summary dd{overflow-wrap:anywhere}
 #waterTotals{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#waterTotals th,#waterTotals td{padding:7px;text-align:right;border-bottom:1px solid #344d412b}#waterTotals th:first-child{text-align:left;font-weight:500}#waterTotals tbody tr:last-child{font-weight:700}#waterForm h3{margin-top:18px!important}
 #recoveryMinute{width:clamp(110px,24vw,360px)}#recoveryClock{font-variant-numeric:tabular-nums}#waterEnergy{max-width:100%}
-</style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
+.water-fold>summary,#waterForm details>summary{font-size:1rem;font-weight:650;padding:4px 0}.water-stack>details{margin:0}.water-stack .water-outcome{font:600 clamp(1.25rem,2vw,1.65rem) Georgia,serif;margin:12px 0;color:#184c43}.water-stack .water-outcome.short{color:#77371a}#waterCards>.chart{align-self:start}#waterForm select{max-width:55%}.water-fold>summary{cursor:pointer}#waterBaseline{margin:12px 0}</style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
 <p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="builder" hidden aria-label="Battery design editor">
@@ -123,11 +123,17 @@ body.capture{background:#fff}
 <label>Usable tank volume (million gal)<input name="capacity" required type="number" min="0" max="1000" step="any" value="2.5"></label>
 <label>Starting tank fill (%)<input name="fill" required type="number" min="0" max="100" step="any" value="100"></label>
 <label>Maximum tank outflow (MGD)<input name="outlet" required type="number" min="0" max="1000" step="any" value="24"></label>
-<h3>Conservation and reuse</h3>
+<details open><summary>Emergency reserve</summary>
+<label>Standby tank (million gal)<input name="reserveCapacity" required type="number" min="0" max="1000" step="any" value="0"></label>
+<label>Emergency outlet (MGD)<input name="reserveOutlet" required type="number" min="0" max="1000" step="any" value="10"></label>
+<label>Reserve policy<select name="reserveMode"><option value="release">Release during shortfalls</option><option value="hold">Hold in reserve</option></select></label>
+<p>The separate standby tank starts full. Its own outlet can cover demand left after normal supplies. Surplus potable water refills the working tank first, then the standby tank. Reserve construction uses the storage price below.</p></details>
+<details><summary>Conservation and reuse</summary>
 <label>System-wide conservation (%)<input name="conservation" required type="number" min="0" max="100" step="any" value="0"></label>
 <label>Eligible landscape irrigation (% of end use)<input name="irrigationShare" required type="number" min="0" max="100" step="any" value="20"></label>
 <label>Additional irrigation reduction (%)<input name="irrigationCut" required type="number" min="0" max="100" step="any" value="0"></label>
 <label>Available reclaimed supply (MGD)<input name="reuseLimit" required type="number" min="0" max="1000" step="any" value="0"></label>
+</details>
 <details><summary>Pumping and treatment electricity</summary>
 <label>Potable intake conveyance (kWh/million gal)<input name="conveyKwh" required type="number" min="0" max="100000" step="any" value="100"></label>
 <label>Potable treatment (kWh/million gal)<input name="treatKwh" required type="number" min="0" max="100000" step="any" value="250"></label>
@@ -142,28 +148,29 @@ body.capture{background:#fff}
 <label>Other installation costs ($, optional)<input name="otherCapital" type="number" min="0" max="1000000000000" step="any" placeholder="Unpriced"></label>
 <p>Tolleson's FY 2027 funding request estimates $3 million for a two-million-gallon tank. This estimate applies that $1.50/gal benchmark to usable volume. Supply development, separate pumping upgrades and operating costs are outside the estimate. <a href="https://www.tolleson.az.gov/DocumentCenter/View/10012/FY27-Tolleson-CPF-Project-Description---Drinking-Water-Storage-Improvements" target="_blank" rel="noopener">City of Tolleson project description</a></p></details>
 <div class="water-actions"><button id="saveWater" type="submit">Save design</button><button id="newWater" type="button">New design</button></div><output id="waterStatus" role="status"></output></form>
-<section class="chart water-summary"><h2>Design performance</h2><p id="waterPreviewTime"></p><dl id="waterPreview"></dl>
+<section class="chart water-summary"><h2>Design performance</h2><p id="waterPreviewTime"></p><dl id="waterPreview"></dl><details><summary>Storage, conservation and electricity</summary><dl id="waterPreviewDetail"></dl></details>
 <div class="water-actions"><button id="waterLoadA">Test as Design A</button><button id="waterLoadB">Test as Design B</button></div></section></div>
 <section class="chart"><h2>Saved water designs</h2><p>Saved in this browser on this device.</p><div class="water-actions" id="savedWater"></div></section></section>
 <section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div>
 <section id="waterLab" class="water-stack" hidden aria-label="Water system comparison">
 <section class="chart"><h2>Water system comparison</h2><p id="waterLabTime"></p><button id="labWaterBuilder">Design a water system</button>
+<details><summary>Try an emergency reserve</summary><p>Copy Design A into B with a full 1-million-gallon standby tank and a 10 MGD emergency outlet. Compare the additional cost and gallons of shortfall avoided.</p><button id="tryWaterReserve">Test emergency reserve in B</button></details>
 <details><summary>Try an irrigation and reuse comparison</summary><p>Copy Design A into B with a 25% irrigation reduction and 4 MGD of reclaimed supply. Both systems will have the same tank and potable supply. The example assumes a reuse connection is available.</p><button id="tryWaterReuse">Load comparison into Design B</button></details></section>
 <div class="builder-layout" id="waterCards"></div>
-<section class="chart"><h3>24-hour tank recovery</h3>
+<details class="chart water-fold" id="recoveryDetails"><summary>How do the tanks recover over 24 hours?</summary>
 <p>Follow both tanks from 14:00 today to 14:00 tomorrow. The morning peak is at 10:00 MST.</p>
 <div class="water-actions"><label>Recovery time <input id="recoveryMinute" type="range" min="0" max="1440" value="1440" step="1"></label><output id="recoveryClock" for="recoveryMinute"></output><button id="recoveryPlay">Replay 24 hours</button></div>
 <div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="recoveryPlot" role="img"></svg><p id="recoveryReading"></p>
 <div class="builder-layout"><section class="water-summary"><h4>Design A</h4><dl id="dayA"></dl></section><section class="water-summary"><h4>Design B</h4><dl id="dayB"></dl></section></div>
-<details><summary>Overnight demand assumptions</summary><p>The first three hours use the selected event. After 17:00, demand follows an illustrative daily profile scaled to the event's closing demand. Hourly factors approximate the AWWA average-day curve, with an evening peak, an overnight low and a morning peak. Supply limits and design settings continue through midnight. Recovery compares the reserve at 10:00 tomorrow with the starting volume. <a href="https://www.epa.gov/sites/production/files/2015-09/documents/2007_05_18_disinfection_tcr_whitepaper_tcr_waterdistribution.pdf" target="_blank" rel="noopener">AWWA daily demand curve, figure 2</a></p></details></section>
-<section class="chart"><h3>Three-hour water use and cost</h3><table id="waterTotals"><thead><tr><th scope="col">14:00–17:00 MST</th><th scope="col">Design A</th><th scope="col">Design B</th></tr></thead><tbody></tbody></table>
-<p>Potable intake includes tank refills. Water already stored at 14:00 carries no new purchase charge. Compare ending reserves and unmet demand alongside cost.</p></section>
-<section class="chart"><h3>Water supply and demand</h3><label>Show flow for <select id="waterFlowDesign"><option>A</option><option>B</option></select></label>
-<div class="water-key"><span><i style="background:#5684a0"></i>Direct potable</span><span><i style="background:#24857a"></i>Tank withdrawal</span><span><i style="background:#9765a0"></i>Reclaimed irrigation</span><span><i style="background:#b75c48"></i>Unmet demand</span><span><i style="height:2px;background:#19342f"></i>Demand after conservation</span></div>
-<svg id="waterFlow" role="img"></svg><p id="waterFlowReading"></p><p id="waterEndUse"></p></section>
-<section class="chart"><h3>Water remaining in storage</h3><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="waterReserve" role="img"></svg><p id="waterReserveReading"></p></section>
-<details class="chart"><summary>Water balance and planning assumptions</summary><p>Baseline potable supply is provisionally 18 MGD. Gross demand of 150 gallons per resident per day includes the modeled distribution loss, pending team confirmation. System-wide conservation reduces gross demand proportionally. Targeted irrigation savings apply only to remaining eligible end use. Reclaimed water serves that irrigation first. Potable supply and tank withdrawals serve the remaining demand, prioritizing potable-only uses and modeled losses. Only surplus potable supply refills the tank. Each elapsed minute uses its ending flow divided by 1,440 to calculate million gallons. The starting reading transfers no water. Pressure and emergency reserves are outside this model.</p></details></section>
-<label id="referenceControl">Compare with <select id="compare"></select></label>
+<details><summary>Overnight demand assumptions</summary><p>The first three hours use the selected event. After 17:00, demand follows an illustrative daily profile scaled to the event's closing demand. Hourly factors approximate the AWWA average-day curve, with an evening peak, an overnight low and a morning peak. Supply limits and design settings continue through midnight. Recovery compares the reserve at 10:00 tomorrow with the starting volume. <a href="https://www.epa.gov/sites/production/files/2015-09/documents/2007_05_18_disinfection_tcr_whitepaper_tcr_waterdistribution.pdf" target="_blank" rel="noopener">AWWA daily demand curve, figure 2</a></p></details></details>
+<details class="chart water-fold"><summary>What does each design cost?</summary><table id="waterTotals"><thead><tr><th scope="col">14:00–17:00 MST</th><th scope="col">Design A</th><th scope="col">Design B</th></tr></thead><tbody></tbody></table>
+<p>Potable intake includes tank refills. Water already stored at 14:00 carries no new purchase charge. Compare ending reserves and unmet demand alongside cost.</p></details>
+<details id="waterFlowDetails" class="chart water-fold"><summary>Where does the water come from?</summary><label>Show flow for <select id="waterFlowDesign"><option>A</option><option>B</option></select></label>
+<div class="water-key"><span><i style="background:#5684a0"></i>Direct potable</span><span><i style="background:#24857a"></i>Tank withdrawal</span><span><i style="background:#9765a0"></i>Reclaimed irrigation</span><span><i style="background:#ce8b27"></i>Emergency reserve</span><span><i style="background:#b75c48"></i>Unmet demand</span><span><i style="height:2px;background:#19342f"></i>Demand after conservation</span></div>
+<svg id="waterFlow" role="img"></svg><p id="waterFlowReading"></p><p id="waterEndUse"></p>
+<h3>Working tank levels</h3><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="waterReserve" role="img"></svg><p id="waterReserveReading"></p></details>
+<details class="chart"><summary>Water balance and planning assumptions</summary><p>Baseline potable supply is provisionally 18 MGD. Gross demand of 150 gallons per resident per day includes the modeled distribution loss, pending team confirmation. System-wide conservation reduces gross demand proportionally. Targeted irrigation savings apply only to remaining eligible end use. Reclaimed water serves that irrigation first. Potable supply and tank withdrawals serve the remaining demand, prioritizing potable-only uses and modeled losses. Only surplus potable supply refills the tank. Each elapsed minute uses its ending flow divided by 1,440 to calculate million gallons. The starting reading transfers no water. A separate standby outlet can release reserve water into any remaining shortfall. Refill uses surplus potable supply after the working tank is full. The model assumes sufficient distribution pressure.</p></details></section>
+<details id="waterBaseline" class="chart water-fold" hidden><summary>Compare baseline scenarios</summary></details><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
 <section id="energyStudy"><h2>Battery design comparison</h2><button type="button" id="labOpenBuilder">Design a battery</button><p id="balance"></p>
@@ -672,9 +679,9 @@ window.addEventListener('storage',e=>{if(building==='battery'&&(!e.key||e.key.st
 if(building==='battery')listBatteries();
 
 const waterForm=byId('waterForm'),waterPrefix='belmont.water.v1.';
-const reuseDefaults={irrigationShare:20,irrigationCut:0,reuseLimit:0,potableRate:2.73,reuseRate:0.94,conveyKwh:100,treatKwh:250,pumpKwh:1150};
-const waterLimits={supply:1000,capacity:1000,fill:100,outlet:1000,conservation:100,unitCost:1000,irrigationShare:100,irrigationCut:100,reuseLimit:1000,potableRate:1000,reuseRate:1000,conveyKwh:100000,treatKwh:100000,pumpKwh:100000};
-const waterDefaults={name:'Afternoon reserve',supply:design.waterSupply,capacity:2.5,fill:100,outlet:24,conservation:0,unitCost:1.5,...reuseDefaults,otherCapital:null};
+const reuseDefaults={irrigationShare:20,irrigationCut:0,reuseLimit:0,potableRate:2.73,reuseRate:0.94,conveyKwh:100,treatKwh:250,pumpKwh:1150,reserveCapacity:0,reserveOutlet:10};
+const waterLimits={supply:1000,capacity:1000,fill:100,outlet:1000,conservation:100,unitCost:1000,irrigationShare:100,irrigationCut:100,reuseLimit:1000,potableRate:1000,reuseRate:1000,conveyKwh:100000,treatKwh:100000,pumpKwh:100000,reserveCapacity:1000,reserveOutlet:1000};
+const waterDefaults={name:'Afternoon reserve',supply:design.waterSupply,capacity:2.5,fill:100,outlet:24,conservation:0,unitCost:1.5,...reuseDefaults,reserveMode:'release',otherCapital:null};
 function cleanWater(raw){
  if(!raw||typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>64)return null;
  const d={name:raw.name.trim()};
@@ -683,6 +690,7 @@ function cleanWater(raw){
   d[field]=v;
  }
  d.otherCapital=raw.otherCapital??null;
+ d.reserveMode=raw.reserveMode??'release';if(!['hold','release'].includes(d.reserveMode))return null;
  if(d.otherCapital!==null&&(!Number.isFinite(d.otherCapital)||d.otherCapital<0||d.otherCapital>1e12))return null;
  return d;
 }
@@ -715,6 +723,7 @@ function simulateWater(d,id,horizon=duration){
  let stored=d.capacity*d.fill/100,unserved=0,first=null;
  let potableVolume=0,reuseVolume=0,conserved=0,irrigationSavings=0;
  let electricity=0,minStored=stored;
+ let standby=d.reserveCapacity,reserveUsed=0,reserveRefilled=0;
  const frames=[];
  for(let m=0;m<=horizon;m++){
   const gross=waterDemand(id,m);
@@ -726,24 +735,29 @@ function simulateWater(d,id,horizon=duration){
   const potableRequired=demand-reclaimed,direct=Math.min(d.supply,potableRequired);
   const need=potableRequired-direct,available=stored;
   const withdrawal=Math.min(need,d.outlet,m?available*1440:(available>0?d.outlet:0));
-  const unmet=Math.max(0,need-withdrawal);
+  const shortfall=Math.max(0,need-withdrawal);
+  const emergency=d.reserveMode==='release'?Math.min(shortfall,d.reserveOutlet,m?standby*1440:(standby>0?d.reserveOutlet:0)):0;
+  const unmet=shortfall-emergency;
   const refill=Math.min(d.supply-direct,m?(d.capacity-stored)*1440:(stored<d.capacity?d.supply-direct:0));
-  const intake=direct+refill,delivered=direct+withdrawal+reclaimed;
+  const standbyRefill=Math.min(Math.max(0,d.supply-direct-refill),m?(d.reserveCapacity-standby)*1440:0);
+  const intake=direct+refill+standbyRefill,delivered=direct+withdrawal+reclaimed+emergency;
   const pumpMW=(intake*d.conveyKwh+delivered*d.pumpKwh)/24000;
   const treatmentMW=intake*d.treatKwh/24000,waterMW=pumpMW+treatmentMW;
   if(m){
    stored=Math.max(0,Math.min(d.capacity,stored+(refill-withdrawal)/1440));
    unserved+=unmet/1440;
-   potableVolume+=(direct+refill)/1440;reuseVolume+=reclaimed/1440;
+   standby=Math.max(0,Math.min(d.reserveCapacity,standby+(standbyRefill-emergency)/1440));
+   reserveUsed+=emergency/1440;reserveRefilled+=standbyRefill/1440;
+   potableVolume+=intake/1440;reuseVolume+=reclaimed/1440;
    conserved+=(gross-demand)/1440;irrigationSavings+=irrigationSaved/1440;
    electricity+=waterMW/60;minStored=Math.min(minStored,stored);
   }
   if(unmet>1e-9&&first===null)first=m;
-  const potableOnlyGap=Math.max(0,potableOnly-direct-withdrawal);
-  frames.push({demand,irrigation,potableOnly,potableOnlyGap,direct,reclaimed,withdrawal,refill,unmet,stored,available,pumpMW,treatmentMW,waterMW});
+  const potableOnlyGap=Math.max(0,potableOnly-direct-withdrawal-emergency);
+  frames.push({demand,irrigation,potableOnly,potableOnlyGap,direct,reclaimed,withdrawal,refill,emergency,standby,standbyRefill,unmet,stored,available,pumpMW,treatmentMW,waterMW});
  }
  const potableCost=potableVolume*1000*d.potableRate,reuseCost=reuseVolume*1000*d.reuseRate;
- return {frames,unserved,first,ending:stored,minStored,electricity,potableVolume,reuseVolume,conserved,irrigationSavings,potableCost,reuseCost,operatingCost:potableCost+reuseCost};
+ return {frames,unserved,first,ending:stored,minStored,electricity,potableVolume,reuseVolume,conserved,irrigationSavings,potableCost,reuseCost,operatingCost:potableCost+reuseCost,reserveUsed,reserveRefilled,standby};
 }
 function waterRun(slot,id,horizon=duration){
  if(slot.lastDesign!==slot.design){slot.runs=new Map();slot.lastDesign=slot.design}
@@ -752,6 +766,11 @@ function waterRun(slot,id,horizon=duration){
  return slot.runs.get(key);
 }
 function explainWater(f,d){
+ if(f.unmet>1e-9&&d.reserveCapacity>0){
+  if(d.reserveMode==='hold')return 'Standby water is held in reserve while demand exceeds the working supply.';
+  return f.standby<=1e-9?'The standby tank is empty. Some demand remains unmet.':'The emergency outlet cannot cover the full shortfall.';
+ }
+ if(f.emergency>1e-9)return 'Emergency storage covers the remaining '+flow(f.emergency)+' of demand.';
  if(f.unmet>1e-9){
   if(d.capacity===0)return 'This design has no storage to cover demand above direct supply.';
   if(d.outlet===0)return 'The tank outlet is closed.';
@@ -773,7 +792,7 @@ function waterMetrics(list,rows){
 }
 let editingWater=null;
 function readWater(){
- const raw={name:waterForm.elements.namedItem('name').value};
+ const raw={name:waterForm.elements.namedItem('name').value,reserveMode:waterForm.elements.namedItem('reserveMode').value};
  for(const field of Object.keys(waterLimits))raw[field]=waterForm.elements.namedItem(field).valueAsNumber;
  const extra=waterForm.elements.namedItem('otherCapital');
  raw.otherCapital=extra.value===''&&!extra.validity.badInput?null:extra.valueAsNumber;
@@ -800,22 +819,26 @@ function listWater(){
  }catch{list.textContent='Browser storage is unavailable. Designs can still be tested.'}
 }
 function installEstimate(d){
- const tank=d.capacity*1e6*d.unitCost;
- return d.otherCapital===null?money(tank)+' (tank only)':money(tank+d.otherCapital);
+ const tank=(d.capacity+d.reserveCapacity)*1e6*d.unitCost;
+ return d.otherCapital===null?money(tank)+' (storage only)':money(tank+d.otherCapital);
 }
+const reserveBuild=d=>d.reserveCapacity*1e6*d.unitCost;
+const reserveFirstFill=d=>d.reserveCapacity*1000*d.potableRate;
 function renderWaterBuilder(){
  const d=readWater(),id=selector.value,minute=Number(slider.value);
  for(const key of ['saveWater','waterLoadA','waterLoadB'])byId(key).disabled=!d;
  const preview=byId('waterPreview');
  byId('waterPreviewTime').textContent=scenarios[id].name+' · '+time(minute)+' MST';
- if(!d){preview.textContent='Enter a design name and valid specifications.';return}
+ if(!d){preview.textContent='Enter a design name and valid specifications.';byId('waterPreviewDetail').replaceChildren();return}
  const run=simulateWater(d,id),f=run.frames[minute],gap=f.demand-f.reclaimed-f.direct;
  const runtime=gap<=1e-9?'Supply covers demand':gap>d.outlet?'Outlet limits coverage':fmt(f.stored*24/gap)+' h';
- waterMetrics(preview,[['Starting stored water',gallons(d.capacity*d.fill/100)],['Stored at '+time(minute),gallons(f.stored)],
-  ['Runtime at this demand from current reserve',runtime],['Three-hour unserved volume',gallons(run.unserved)],
+ waterMetrics(preview,[['Three-hour unmet demand',gallons(run.unserved)],['Emergency water used',gallons(run.reserveUsed)],
+  ['Standby tank construction',money(reserveBuild(d))],['Initial standby fill',dollars.format(reserveFirstFill(d))],['Three-hour water purchases',dollars.format(run.operatingCost)]]);
+ waterMetrics(byId('waterPreviewDetail'),[['Starting working storage',gallons(d.capacity*d.fill/100)],['Working storage at '+time(minute),gallons(f.stored)],
+  ['Working tank runtime at current demand',runtime],
   ['Ending reserve',gallons(run.ending)],['Three-hour demand avoided',gallons(run.conserved)],['Three-hour reclaimed irrigation',gallons(run.reuseVolume)],
   ['Pumping and treatment at '+time(minute),fmt(f.waterMW)+' MW'],['Three-hour electricity',fmt(run.electricity)+' MWh'],
-  ['Three-hour water purchase cost',dollars.format(run.operatingCost)],['One-time installation estimate',installEstimate(d)]]);
+  ['One-time installation estimate',installEstimate(d)]]);
 }
 waterForm.oninput=()=>{byId('waterStatus').textContent='';renderWaterBuilder()};
 waterForm.onsubmit=e=>{
@@ -832,6 +855,11 @@ function openWaterDesigner(){
 }
 function openWaterLab(){building=null;lab=true;domain='water';update();byId('domainBar').querySelector('[value="water"]').focus()}
 byId('labWaterBuilder').onclick=openWaterDesigner;
+byId('tryWaterReserve').onclick=()=>{
+ const [a,b]=waterSlots;
+ b.design={...a.design,name:'Emergency reserve',reserveCapacity:1,reserveOutlet:10,reserveMode:'release'};
+ b.custom=true;waterFlowSelect.value='B';update();
+};
 byId('tryWaterReuse').onclick=()=>{
  const [a,b]=waterSlots;
  b.design={...a.design,name:'Irrigation and reuse',irrigationCut:25,reuseLimit:4,otherCapital:null};
@@ -845,7 +873,7 @@ for(const slot of waterSlots){
   slot.design=d;slot.custom=true;waterFlowSelect.value=slot.slot;openWaterLab();
  };
  const card=document.createElement('article');card.className='chart water-summary';
- card.innerHTML='<h3></h3><p class="water-spec"></p><progress max="100"></progress><dl></dl><p class="water-diagnosis"></p><div class="water-actions"><button class="water-jump">First shortfall</button><button class="water-edit">Edit design</button><button class="water-energy">Test load in Energy</button></div>';
+ card.innerHTML='<h3></h3><p class="water-outcome"></p><dl class="water-headline"></dl><button class="water-edit">Edit design</button><details><summary>Operating details and Energy test</summary><p class="water-spec"></p><progress max="100"></progress><dl class="water-detail"></dl><p class="water-diagnosis"></p><div class="water-actions"><button class="water-jump">First shortfall</button><button class="water-energy">Test load in Energy</button></div></details>';
  card.querySelector('progress').setAttribute('aria-label','Design '+slot.slot+' tank fill');
  card.querySelector('.water-jump').onclick=()=>{const first=waterRun(slot,selector.value).first;if(first!==null)seek(first)};
  card.querySelector('.water-edit').onclick=()=>{fillWater(slot.design,null);openWaterDesigner()};
@@ -873,7 +901,7 @@ function drawWaterPlot(svg,series,minute,stacked,unit,reading){
  add('line',{x1:x(minute),x2:x(minute),y1:18,y2:bottom,class:'cursor'});
  const points=series.map(values=>values.slice(0,minute+1).map((v,m)=>x(m)+','+y(v)));
  if(stacked){
-  const colors=['#5684a0','#24857a','#9765a0','#b75c48'];
+  const colors=['#5684a0','#24857a','#9765a0','#ce8b27','#b75c48'];
   for(let i=0;i<points.length;i++){
    const lower=i?points[i-1].slice().reverse():[x(minute)+','+bottom,x(0)+','+bottom];
    add('polygon',{points:points[i].concat(lower).join(' '),fill:colors[i]});
@@ -888,7 +916,14 @@ function drawWaterPlot(svg,series,minute,stacked,unit,reading){
  }
 }
 const recoveryMinute=byId('recoveryMinute'),recoveryPlay=byId('recoveryPlay');
-if(/^\d{1,4}$/.test(saved.get('recovery'))&&Number(saved.get('recovery'))<=dayLength)recoveryMinute.value=saved.get('recovery');
+if(/^\d{1,4}$/.test(saved.get('recovery'))&&Number(saved.get('recovery'))<=dayLength){recoveryMinute.value=saved.get('recovery');byId('recoveryDetails').open=true}
+for(const key of ['recoveryDetails','waterFlowDetails','waterBaseline']){
+ byId(key).ontoggle=()=>{
+  if(!lab||domain!=='water')return;
+  if(byId(key).open)render();
+  else if(key==='recoveryDetails'&&recoveryTimer)stop();
+ };
+}
 recoveryMinute.oninput=update;
 let recoveryTimer,lastRecovery;
 recoveryPlay.onclick=()=>{
@@ -916,21 +951,27 @@ function renderRecovery(id){
   const drawdown=r.frames.findIndex(f=>f.stored+1e-9<start);
   const restored=drawdown<0?-1:r.frames.findIndex((f,m)=>m>drawdown&&f.stored+1e-9>=start);
   const recoveryTime=drawdown<0?(start>0?'Reserve held':'No starting reserve'):restored<0?'Beyond this run':waterClock(restored)+' MST';
-  waterMetrics(byId('day'+slot.slot),[['Starting reserve',gallons(start)],['First recovery after drawdown',recoveryTime],['Reserve at 10:00 tomorrow',gallons(peak)],['Morning recovery',outcome],
-   ['Lowest reserve in 24 h',gallons(r.minStored)],['Ending reserve',gallons(r.ending)],['24-hour unserved water',gallons(r.unserved)],['24-hour water purchases',dollars.format(r.operatingCost)],['24-hour electricity',fmt(r.electricity)+' MWh']]);
+  waterMetrics(byId('day'+slot.slot),[['Starting working storage',gallons(start)],['First recovery after drawdown',recoveryTime],['Working storage at 10:00 tomorrow',gallons(peak)],['Morning recovery',outcome],
+   ['Lowest working storage in 24 h',gallons(r.minStored)],['Ending working storage',gallons(r.ending)],['Emergency water delivered',gallons(r.reserveUsed)],['Standby water at 10:00 tomorrow',gallons(r.frames[morningPeak].standby)],['Ending standby water',gallons(r.standby)],['24-hour unserved water',gallons(r.unserved)],['24-hour water purchases',dollars.format(r.operatingCost)],['24-hour electricity',fmt(r.electricity)+' MWh']]);
  }
 }
 function renderWaterLab(id,minute){
- renderRecovery(id);
+ if(byId('recoveryDetails').open)renderRecovery(id);
  const runs=waterSlots.map(slot=>waterRun(slot,id)),stamp=time(minute)+' MST';
- byId('waterLabTime').textContent=scenarios[id].name+' · '+stamp+' · Baseline demand '+flow(waterDemand(id,minute))+'. Both designs start at 14:00.';
+ byId('waterLabTime').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST';
  waterSlots.forEach(({slot,design:d,card},i)=>{
   const r=runs[i],f=r.frames[minute];
   card.querySelector('h3').textContent='Design '+slot+' · '+d.name;
+  const outcome=card.querySelector('.water-outcome');
+  outcome.textContent=r.first===null?'All demand met':gallons(r.unserved)+' unmet';
+  outcome.classList.toggle('short',r.first!==null);
+  const headline=[['Emergency water used',d.reserveCapacity?gallons(r.reserveUsed):'No standby tank'],['Three-hour water purchases',dollars.format(r.operatingCost)]];
+  if(d.reserveCapacity)headline.push(['Standby tank + initial fill',money(reserveBuild(d)+reserveFirstFill(d))]);
+  waterMetrics(card.querySelector('.water-headline'),headline);
   card.querySelector('.water-spec').textContent=flow(d.supply)+' potable supply · '+flow(d.reuseLimit)+' reclaimed capacity · '+flow(d.outlet)+' tank outlet';
   card.querySelector('progress').value=d.capacity?f.stored/d.capacity*100:0;
-  waterMetrics(card.querySelector('dl'),[['Stored at '+time(minute),fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Current unmet demand',flow(f.unmet)],
-   ['Three-hour unserved volume',gallons(r.unserved)],['First shortfall',r.first===null?'None':time(r.first)+' MST'],['Ending reserve',gallons(r.ending)],
+  waterMetrics(card.querySelector('.water-detail'),[['Working storage at '+time(minute),fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Current unmet demand',flow(f.unmet)],
+   ['First shortfall',r.first===null?'None':time(r.first)+' MST'],['Ending working storage',gallons(r.ending)],['Ending emergency storage',gallons(r.standby)],
    ['Pumping at '+time(minute),fmt(f.pumpMW)+' MW'],['Treatment at '+time(minute),fmt(f.treatmentMW)+' MW'],['Three-hour electricity',fmt(r.electricity)+' MWh']]);
   card.querySelector('.water-jump').hidden=r.first===null;
   card.querySelector('.water-diagnosis').textContent=stamp+' · '+explainWater(f,d);
@@ -943,17 +984,21 @@ function renderWaterLab(id,minute){
   ['Potable intake including refills',runs.map(r=>gallons(r.potableVolume))],
   ['Potable purchases',runs.map(r=>dollars.format(r.potableCost))],
   ['Reclaimed purchases',runs.map(r=>dollars.format(r.reuseCost))],
+  ['Standby refills (included in potable purchases)',runs.map((r,i)=>dollars.format(r.reserveRefilled*1000*waterSlots[i].design.potableRate))],
   ['Three-hour water purchase cost',runs.map(r=>dollars.format(r.operatingCost))],
+  ['Standby tank construction (included in installation)',waterSlots.map(s=>money(reserveBuild(s.design)))],
+  ['Initial standby fill (before the run)',waterSlots.map(s=>dollars.format(reserveFirstFill(s.design)))],
   ['One-time installation estimate',waterSlots.map(s=>installEstimate(s.design))]
  ]){
   const row=totals.insertRow(),heading=document.createElement('th');heading.scope='row';heading.textContent=label;row.append(heading);
   for(const value of values)row.insertCell().textContent=value;
  }
+ if(!byId('waterFlowDetails').open)return;
  const idx=waterFlowSelect.selectedIndex,frames=runs[idx].frames,f=frames[minute];
- const reading=stamp+' · Design '+waterSlots[idx].slot+' · Direct potable '+flow(f.direct)+' · Tank '+flow(f.withdrawal)+' · Reclaimed '+flow(f.reclaimed)+' · Unmet '+flow(f.unmet)+' · Total demand '+flow(f.demand);
+ const reading=stamp+' · Design '+waterSlots[idx].slot+' · Direct potable '+flow(f.direct)+' · Working tank '+flow(f.withdrawal)+' · Reclaimed '+flow(f.reclaimed)+' · Emergency '+flow(f.emergency)+' · Unmet '+flow(f.unmet)+' · Total demand '+flow(f.demand);
  byId('waterFlowReading').textContent=reading;
  byId('waterEndUse').textContent='Potable-only demand including distribution losses is '+flow(f.potableOnly)+' ('+flow(f.potableOnlyGap)+' unmet). Eligible landscape demand is '+flow(f.irrigation)+' ('+flow(Math.max(0,f.unmet-f.potableOnlyGap))+' unmet).';
- drawWaterPlot(byId('waterFlow'),[frames.map(v=>v.direct),frames.map(v=>v.direct+v.withdrawal),frames.map(v=>v.direct+v.withdrawal+v.reclaimed),frames.map(v=>v.demand)],minute,true,'MGD',reading);
+ drawWaterPlot(byId('waterFlow'),[frames.map(v=>v.direct),frames.map(v=>v.direct+v.withdrawal),frames.map(v=>v.direct+v.withdrawal+v.reclaimed),frames.map(v=>v.demand-v.unmet),frames.map(v=>v.demand)],minute,true,'MGD',reading);
  const reserve=stamp+' · '+runs.map((r,i)=>'Design '+waterSlots[i].slot+' '+gallons(r.frames[minute].stored)).join(' · ');
  byId('waterReserveReading').textContent=reserve;
  drawWaterPlot(byId('waterReserve'),runs.map(r=>r.frames.map(f=>f.stored)),minute,false,'million gal',reserve);
@@ -972,7 +1017,10 @@ function render(){
  document.title='Belmont | '+document.querySelector('h1').textContent;
  byId('testLoad').hidden=lab;
  byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=['energy','overview'].includes(domain);
- byId('overview').hidden=domain!=='overview';byId('referenceControl').hidden=domain==='energy';
+ const baseline=byId('waterBaseline'),reference=byId('referenceControl'),study=byId('domainStudy');
+ if(domain==='water'&&study.parentElement!==baseline)baseline.append(reference,study);
+ if(domain!=='water'&&study.parentElement===baseline){baseline.after(reference);byId('energyStudy').after(study)}
+ baseline.hidden=domain!=='water';byId('overview').hidden=domain!=='overview';reference.hidden=domain==='energy';
  byId('waterExperiment').hidden=domain!=='water';byId('waterLab').hidden=domain!=='water';
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
  if(lab && domain==='energy'){
@@ -1009,7 +1057,7 @@ function render(){
  if(!lab&&!building){
   const slot=waterSlots[0],d=slot.design,f=waterRun(slot,id).frames[minute];
   byId('waterOpsName').textContent=d.name;
-  waterMetrics(byId('waterOps'),[['Available potable supply',flow(d.supply)],['Demand after conservation',flow(f.demand)],['Eligible irrigation',flow(f.irrigation)],['Reclaimed delivered',flow(f.reclaimed)],['Tank fill',fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Unmet demand',flow(f.unmet)]]);
+  waterMetrics(byId('waterOps'),[['Available potable supply',flow(d.supply)],['Demand after conservation',flow(f.demand)],['Eligible irrigation',flow(f.irrigation)],['Reclaimed delivered',flow(f.reclaimed)],['Working tank',fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Emergency water stored',gallons(f.standby)],['Unmet demand',flow(f.unmet)]]);
  }
  byId('clock').textContent=time(minute)+' MST';
  byId('reportState').textContent=end.name+' · '+byId('clock').textContent;
