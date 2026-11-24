@@ -99,6 +99,7 @@ body.capture{background:#fff}
 #waterTotals{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#waterTotals th,#waterTotals td{padding:7px;text-align:right;border-bottom:1px solid #344d412b}#waterTotals th:first-child{text-align:left;font-weight:500}#waterTotals tbody tr:last-child{font-weight:700}#waterForm h3{margin-top:18px!important}
 #recoveryMinute{width:clamp(110px,24vw,360px)}#recoveryClock{font-variant-numeric:tabular-nums}#waterEnergy{max-width:100%}
 #energyStudy{display:grid;gap:14px;margin:14px 0;min-width:0}
+.compute-form label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}.compute-form input{font:inherit;width:38%;min-width:0;max-width:220px;padding:6px;border:1px solid #72857a;border-radius:5px;background:#fffdf4}.compute-form h3{padding-top:10px}#computeWork{max-width:620px}#computeCards>.chart{align-self:start}#computeCards dt,#computePreview dt{white-space:normal}#computeCards dl div,#computePreview div{gap:10px}
 #mobilityForm label,#mobilityDemand label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}
 #mobilityForm input,#mobilityDemand input{font:inherit;min-width:0;width:40%;max-width:220px;padding:6px;border:1px solid #72857a;border-radius:5px;background:#fffdf4}
 #mobilityCards>.chart{align-self:start}#mobilityCards dl div,#mobilityPreview div{gap:10px}#mobilityCards dt,#mobilityPreview dt{white-space:normal}#mobilityForm h3{margin-top:18px!important}#mobilityDemand{max-width:620px}
@@ -176,7 +177,27 @@ body.capture{background:#fff}
 <section class="chart water-summary"><h2>Design performance</h2><p id="mobilityPreviewTime"></p><dl id="mobilityPreview"></dl>
 <div class="water-actions"><button id="mobilityLoadA">Test as Design A</button><button id="mobilityLoadB">Test as Design B</button></div></section></div>
 <section class="chart"><h2>Saved mobility designs</h2><p>Saved in this browser on this device.</p><div id="savedMobility" class="water-actions"></div></section></section>
+<section id="computeBuilder" class="water-stack" hidden aria-label="Data center designer">
+<div class="builder-layout"><form id="computeForm" class="chart compute-form"><h2>Data center specifications</h2>
+<label>Design name<input name="name" maxlength="64" required></label><div id="serverFields"></div>
+<h3>Cooling system</h3><div id="coolingFields"></div><p>Set the assist savings to zero for dry cooling. When cooling water runs short, the remaining IT load uses dry cooling.</p>
+<div class="water-actions"><button id="computeSave">Save design</button><button type="button" id="computeNew">New design</button></div><output id="computeStatus" role="status"></output></form>
+<section class="chart water-summary"><h2>Design performance</h2><p id="computePreviewTime"></p><dl id="computePreview"></dl>
+<div class="water-actions"><button id="computeLoadA">Test as Design A</button><button id="computeLoadB">Test as Design B</button></div></section></div>
+<section class="chart"><h2>Saved data center designs</h2><p>Saved in this browser on this device.</p><div id="savedCompute" class="water-actions"></div></section></section>
 <section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div>
+<section id="computeLab" class="water-stack" hidden aria-label="Data center comparison">
+<section class="chart"><h2>Data center design comparison</h2><p id="computePeriod"></p><button id="labComputeBuilder">Design a data center</button>
+<details><summary>Workload, utility limits and prices</summary><form id="computeWork" class="compute-form"><div id="computeSharedFields"></div>
+<div class="water-actions"><button>Apply to both designs</button><button type="button" id="computeStress">Test a 50 MW power limit</button></div><output id="computeWorkStatus" role="status"></output></form></details></section>
+<div class="builder-layout" id="computeCards"></div>
+<details class="chart water-fold" id="computeTrace"><summary>How do power, water and queued work change?</summary><label>Show <select id="computeMetric"><option value="power">Facility power (MW)</option><option value="water">Cooling water (L/min)</option><option value="queue">Batch work waiting (MWh IT)</option><option value="miss">Immediate workload missed (MW IT)</option></select></label>
+<div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="computePlot" role="img"></svg><p id="computeReading"></p></details>
+<details class="chart water-fold"><summary>Model assumptions and sources</summary>
+<p>Work is measured in equivalent IT MWh at a fixed server efficiency. Immediate work must run on arrival. Batch work can wait and use spare capacity later. Both designs start with an empty queue. Results cover 14:00–17:00 MST, with one minute of work counted at each minute end.</p>
+<p>The dry overhead factor scales each scenario’s existing facility overhead. Water assist can reduce a chosen share of that overhead on the IT load the available water can cool. These are illustrative design parameters. PUE relates total facility energy to IT energy, and site WUE relates site water use to IT energy. Here the ratios cover the simulated event and the water estimate covers cooling only. <a href="https://www.energy.gov/cmei/femp/cooling-water-efficiency-opportunities-federal-data-centers">DOE metric definitions</a> · <a href="https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report.pdf">Berkeley Lab cooling comparisons</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix campus scale reference</a></p>
+<p>The editable electricity price uses Arizona’s 2025 industrial average of 8.05¢/kWh. The water price uses the Water designer’s $2.73 per thousand gallons planning assumption. Costs cover modeled electricity and cooling water, excluding construction, equipment, demand charges and standby power. The model assumes zero idle draw. <a href="https://www.eia.gov/electricity/annual/table.php?t=epa_02_10.html">EIA state electricity prices</a></p></details>
+<details class="chart water-fold" id="computeBaseline"><summary>Compare baseline scenarios</summary></details></section>
 <section id="mobilityLab" class="water-stack" hidden aria-label="Mobility comparison">
 <section class="chart"><h2>Mobility design comparison</h2><p id="mobilityPeriod"></p><button id="labMobilityBuilder">Design a mobility system</button>
 <details><summary>Shared arrivals and service target</summary><form id="mobilityDemand"><p>Apply the same hourly arrivals and maximum shuttle interval to both designs for the full three-hour test.</p><div id="arrivalFields"></div><button>Apply to both designs</button> <output id="arrivalStatus" role="status"></output></form></details></section>
@@ -194,6 +215,7 @@ body.capture{background:#fff}
 <details><summary>Try an emergency reserve</summary><p>Copy Design A into B with a full 1-million-gallon standby tank and a 10 MGD emergency outlet. Compare the additional cost and gallons of shortfall avoided.</p><button id="tryWaterReserve">Test emergency reserve in B</button></details>
 <details><summary>Try an irrigation and reuse comparison</summary><p>Copy Design A into B with a 25% irrigation reduction and 4 MGD of reclaimed supply. Both systems will have the same tank and potable supply. The example assumes a reuse connection is available.</p><button id="tryWaterReuse">Load comparison into Design B</button></details></section>
 <div class="builder-layout" id="waterCards"></div>
+<details class="chart water-fold"><summary>Include a data center’s cooling water</summary><label>Campus <select id="computeWater"><option value="off">Baseline dry campus</option><option value="A">Compute Design A</option><option value="B">Compute Design B</option></select></label><p id="computeWaterRead"></p></details>
 <details class="chart water-fold" id="recoveryDetails"><summary>How do the tanks recover over 24 hours?</summary>
 <p>Follow both tanks from 14:00 today to 14:00 tomorrow. The morning peak is at 10:00 MST.</p>
 <div class="water-actions"><label>Recovery time <input id="recoveryMinute" type="range" min="0" max="1440" value="1440" step="1"></label><output id="recoveryClock" for="recoveryMinute"></output><button id="recoveryPlay">Replay 24 hours</button></div>
@@ -212,6 +234,7 @@ body.capture{background:#fff}
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
 <section id="energyStudy" class="energy-stack"><section class="chart"><h2>Battery design comparison</h2><p id="energyPeriod"></p><button type="button" id="labOpenBuilder">Design a battery</button></section>
 <div class="designs" id="designs"></div>
+<details class="chart" id="computeEnergyPanel"><summary>Which data center is included in city load?</summary><label>Campus <select id="computeEnergy"><option value="off">Baseline dry campus</option><option value="A">Compute Design A</option><option value="B">Compute Design B</option></select></label><p id="computeEnergyRead"></p></details>
 <details class="chart" id="purchases"><summary>How do extra grid purchases affect cost and coverage?</summary>
 <label>Extra import capacity <select id="extraImport"><option value="0">Off · existing grid only</option><option value="25">25 MW</option><option value="50">50 MW</option><option value="100">100 MW</option><option value="full">Cover all remaining demand</option></select></label>
 <p>Both designs use solar, up to 140 MW of base imports, then battery discharge. Extra imports cover any remaining shortfall up to the selected limit. This experiment assumes the additional transmission capacity is available.</p>
@@ -272,14 +295,16 @@ function baseSample(id,minute){
 }
 function sample(id,minute){
  const frame=baseSample(id,minute);
+ if(computeEnergy.value!=='off')frame.load+=linkedCompute(computeEnergy,id).frames[minute].power-frame.compute;
  if(waterEnergy.value!=='off'){
   const slot=waterSlots[waterEnergy.selectedIndex-1];
   frame.waterMW=waterRun(slot,id).frames[minute].waterMW;
-  frame.load+=frame.waterMW;frame.battery=Math.max(0,frame.load-frame.at('solar')-design.gridImportLimit);
+  frame.load+=frame.waterMW;
  }
+ frame.battery=Math.max(0,frame.load-frame.at('solar')-design.gridImportLimit);
  return frame;
 }
-let building=['battery','water-design','mobility-design'].includes(saved.get('view'))?saved.get('view'):null;
+let building=['battery','water-design','mobility-design','compute-design'].includes(saved.get('view'))?saved.get('view'):null;
 const limits=[100000,1000000,100];
 function setRating(select,index,value){
  if(!Array.from(select.options).some(option=>Number(option.value)===value))select.add(new Option(value+[' MW',' MWh','%'][index],value));
@@ -410,7 +435,7 @@ for(const power of powerOptions){
 let lastSizing='';
 function renderSizing(id,series){
  const [selectedPower,selectedCapacity,charge]=designs[1].controls.map(el=>Number(el.value));
- const key=id+'/'+charge+'/'+waterEnergy.value+(waterEnergy.value==='off'?'':JSON.stringify(waterSlots[waterEnergy.selectedIndex-1].design));
+ const key=id+'/'+charge+'/'+series.map(s=>s.battery).join(',');
  if(lastSizing!==key){
   byId('sizingNote').textContent='Select a cell to test its power and capacity in Design B at '+charge+'% starting charge.';
   let covered=false;
@@ -533,7 +558,7 @@ plot.onkeydown=e=>{
 };
 function domainReadings({at,compute,load,battery,waterMW}){
  return [
- ['Energy',[row('Total load',load,'MW',1),row('Municipal load',at('city'),'MW',1),row('Solar output',at('solar'),'MW',1),row('Battery discharge',battery,'MW',1),row('Grid imports',load-at('solar')-battery,'MW',1),row('Added water facility',waterMW,'MW',3)],'Total load adds municipal, compute and any selected water facility loads. Imports are capped at '+design.gridImportLimit+' MW. Battery discharge is the power required to balance the model. Installed battery capacity remains to be sized.'],
+ ['Energy',[row('Total load',load,'MW',1),row('Municipal load',at('city'),'MW',1),row('Solar output',at('solar'),'MW',1),row('Battery discharge',battery,'MW',1),row('Grid imports',load-at('solar')-battery,'MW',1),row('Added water facility',waterMW,'MW',3),row('Campus in city total',load-at('city')-waterMW,'MW',1)],'Total load adds municipal, compute and any selected water facility loads. Imports are capped at '+design.gridImportLimit+' MW. Battery discharge is the power required to balance the model. Installed battery capacity remains to be sized.'],
  ['Water',[row('Demand rate',averageDemand*at('water'),'MGD',1),row('Average daily demand',averageDemand,'MGD',1),row('Supply placeholder',design.waterSupply,'MGD',1),row('Distribution loss',at('loss'),'%',1)],'MGD means million gallons per day. Demand is a flow rate. The 18 MGD supply placeholder is 9.3 MGD below average demand. CIRA supply sizing is pending.'],
  ['Mobility',[row('Freight throughput',at('freight'),'trucks/h'),row('Shuttle headway',at('headway'),'min',1),row('C-V2X latency',at('delay'),'ms')],'Freight uses a proposed I-11 logistics corridor. Headway is the interval between neighborhood shuttles. Latency models vehicle-to-infrastructure message delivery.'],
  ['Data / Compute',[row('Facility power',compute,'MW',1),row('Power usage effectiveness',at('pue'),'ratio',2),row('Site cooling WUE',0,'L/kWh',2)],'PUE divides facility power by the fixed '+design.itLoad+' MW IT load. The dry heat-rejection design assumes zero operational cooling-water consumption onsite per IT kWh. Electrical generation and construction water are outside this boundary.'],
@@ -766,18 +791,19 @@ function waterClock(minute){
  return clock+(absolute>=1440?' tomorrow':' today');
 }
 function simulateWater(d,id,horizon=duration){
+ const campus=linkedCompute(computeWater,id);
  let stored=d.capacity*d.fill/100,unserved=0,first=null;
  let potableVolume=0,reuseVolume=0,conserved=0,irrigationSavings=0;
  let electricity=0,minStored=stored;
  let standby=d.reserveCapacity,reserveUsed=0,reserveRefilled=0;
  const frames=[];
  for(let m=0;m<=horizon;m++){
-  const gross=waterDemand(id,m);
-  const afterSystem=gross*(1-d.conservation/100);
+  const campusMGD=campusWaterRate(campus,m),cityGross=waterDemand(id,m),gross=cityGross+campusMGD;
+  const afterSystem=cityGross*(1-d.conservation/100);
   const landscape=afterSystem*(1-scenarios[id].loss/100)*d.irrigationShare/100;
   const irrigationSaved=landscape*d.irrigationCut/100;
-  const irrigation=landscape-irrigationSaved,potableOnly=afterSystem-landscape;
-  const demand=afterSystem-irrigationSaved,reclaimed=Math.min(irrigation,d.reuseLimit);
+  const irrigation=landscape-irrigationSaved,potableOnly=afterSystem-landscape+campusMGD;
+  const demand=afterSystem-irrigationSaved+campusMGD,reclaimed=Math.min(irrigation,d.reuseLimit);
   const potableRequired=demand-reclaimed,direct=Math.min(d.supply,potableRequired);
   const need=potableRequired-direct,available=stored;
   const withdrawal=Math.min(need,d.outlet,m?available*1440:(available>0?d.outlet:0));
@@ -806,10 +832,11 @@ function simulateWater(d,id,horizon=duration){
  return {frames,unserved,first,ending:stored,minStored,electricity,potableVolume,reuseVolume,conserved,irrigationSavings,potableCost,reuseCost,operatingCost:potableCost+reuseCost,reserveUsed,reserveRefilled,standby};
 }
 function waterRun(slot,id,horizon=duration){
+ const campus=linkedCompute(computeWater,id);
  if(slot.lastDesign!==slot.design){slot.runs=new Map();slot.lastDesign=slot.design}
  const key=id+'/'+horizon;
- if(!slot.runs.has(key))slot.runs.set(key,simulateWater(slot.design,id,horizon));
- return slot.runs.get(key);
+ if(!slot.runs.has(key)||slot.runs.get(key).campus!==campus)slot.runs.set(key,{campus,run:simulateWater(slot.design,id,horizon)});
+ return slot.runs.get(key).run;
 }
 function explainWater(f,d){
  if(f.unmet>1e-9&&d.reserveCapacity>0){
@@ -985,7 +1012,7 @@ function renderRecovery(id){
  lastRecovery={minute,width:svg.clientWidth,runs};
  const clock=waterClock(minute)+' MST';byId('recoveryClock').textContent=clock;
  recoveryMinute.setAttribute('aria-valuetext',clock);
- const reading=clock+' · Gross demand '+flow(waterDemand(id,minute))+' · '+runs.map((r,i)=>'Design '+waterSlots[i].slot+' '+gallons(r.frames[minute].stored)+' stored, '+fmt(r.frames[minute].waterMW)+' MW').join(' · ');
+ const reading=clock+' · Gross demand '+flow(waterDemand(id,minute)+campusWaterRate(linkedCompute(computeWater,id),minute))+' · '+runs.map((r,i)=>'Design '+waterSlots[i].slot+' '+gallons(r.frames[minute].stored)+' stored, '+fmt(r.frames[minute].waterMW)+' MW').join(' · ');
  byId('recoveryReading').textContent=reading;
  drawWaterPlot(svg,runs.map(r=>r.frames.map(f=>f.stored)),minute,false,'million gal',reading);
  for(const [i,r] of runs.entries()){
@@ -1004,7 +1031,7 @@ function renderRecovery(id){
 function renderWaterLab(id,minute){
  if(byId('recoveryDetails').open)renderRecovery(id);
  const runs=waterSlots.map(slot=>waterRun(slot,id)),stamp=time(minute)+' MST';
- byId('waterLabTime').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST';
+ byId('waterLabTime').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST'+(computeWater.value==='off'?'':' · Includes Compute Design '+computeWater.value);
  waterSlots.forEach(({slot,design:d,card},i)=>{
   const r=runs[i],f=r.frames[minute];
   card.querySelector('h3').textContent='Design '+slot+' · '+d.name;
@@ -1066,7 +1093,7 @@ const arrivalFields=[
  ['trucks','Truck arrivals per hour',140,0,10000,'arrivalFields'],
  ['target','Maximum shuttle interval (min)',8,0.1,240,'arrivalFields']
 ];
-function mobilityInputs(fields){
+function numericInputs(fields){
  const defaults={};
  for(const [key,title,value,min,max,group,step] of fields){
   const label=document.createElement('label'),input=document.createElement('input');
@@ -1075,37 +1102,37 @@ function mobilityInputs(fields){
  }
  return defaults;
 }
-const fleetDefault={name:'Neighborhood loop',...mobilityInputs(mobilityFields)};
-const arrivalsDefault=mobilityInputs(arrivalFields);
-function mobilityValues(raw,fields){
+const fleetDefault={name:'Neighborhood loop',...numericInputs(mobilityFields)};
+const arrivalsDefault=numericInputs(arrivalFields);
+function numericValues(raw,fields,named=fields===mobilityFields){
  if(!raw||typeof raw!=='object')return null;
  const values={};
  for(const [key,,,min,max,,step] of fields){
   const v=raw[key];if(!Number.isFinite(v)||v<min||v>max||(step===1&&!Number.isInteger(v)))return null;
   values[key]=v;
  }
- if(fields===mobilityFields){
+ if(named){
   if(typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>64)return null;
   values.name=raw.name.trim();
  }
  return values;
 }
-function mobilityParam(key,fields){
- try{return mobilityValues(JSON.parse(saved.get(key)),fields)}catch{return null}
+function savedValues(key,fields,named=fields===mobilityFields){
+ try{return numericValues(JSON.parse(saved.get(key)),fields,named)}catch{return null}
 }
-function mobilityRead(form,fields){
+function formValues(form,fields,named=fields===mobilityFields){
  const raw={};
  for(const [key] of fields)raw[key]=form.elements.namedItem(key).valueAsNumber;
- if(fields===mobilityFields)raw.name=form.elements.namedItem('name').value;
- return mobilityValues(raw,fields);
+ if(named)raw.name=form.elements.namedItem('name').value;
+ return numericValues(raw,fields,named);
 }
-function fillMobilityForm(form,values){
+function fillFields(form,values){
  for(const [key,value] of Object.entries(values))form.elements.namedItem(key).value=value;
 }
-let arrivals=mobilityParam('arrivals',arrivalFields)||arrivalsDefault;
-fillMobilityForm(mobilityDemand,arrivals);
+let arrivals=savedValues('arrivals',arrivalFields)||arrivalsDefault;
+fillFields(mobilityDemand,arrivals);
 mobilityDemand.onsubmit=e=>{
- e.preventDefault();const next=mobilityRead(mobilityDemand,arrivalFields);if(!next)return;
+ e.preventDefault();const next=formValues(mobilityDemand,arrivalFields);if(!next)return;
  arrivals=next;update();byId('arrivalStatus').textContent='Applied to both designs.';
 };
 mobilityDemand.oninput=()=>{byId('arrivalStatus').textContent='Changes pending.'};
@@ -1132,14 +1159,14 @@ function simulateMobility(d,id,demand){
 const mobilityStorage='belmont.mobility.v1.';
 let editingMobility=null;
 function fillMobility(d,key=null){
- fillMobilityForm(mobilityForm,d);editingMobility=key;
+ fillFields(mobilityForm,d);editingMobility=key;
  byId('saveMobility').textContent=key?'Save changes':'Save design';byId('mobilityStatus').textContent='';
 }
 function listMobility(){
  const list=byId('savedMobility');list.replaceChildren();
  try{
   for(const key of Object.keys(localStorage).filter(k=>k.startsWith(mobilityStorage)).sort()){
-   let d;try{d=mobilityValues(JSON.parse(localStorage.getItem(key)),mobilityFields)}catch{continue}
+   let d;try{d=numericValues(JSON.parse(localStorage.getItem(key)),mobilityFields)}catch{continue}
    if(!d)continue;
    const button=document.createElement('button');button.textContent=d.name;
    button.onclick=()=>{fillMobility(d,key);update();mobilityForm.elements.namedItem('name').focus()};list.append(button);
@@ -1162,7 +1189,7 @@ function mobilityResults(run,m){
  ['Three-hour shuttle operating cost',dollars.format(run.cost)],['Fleet purchase estimate',money(run.capital)]];
 }
 function renderMobilityBuilder(){
- const d=mobilityRead(mobilityForm,mobilityFields),m=Number(slider.value),id=selector.value;
+ const d=formValues(mobilityForm,mobilityFields),m=Number(slider.value),id=selector.value;
  for(const key of ['saveMobility','mobilityLoadA','mobilityLoadB'])byId(key).disabled=!d;
  byId('mobilityPreviewTime').textContent=scenarios[id].name+' · '+fmt(arrivals.riders)+' riders/h · '+fmt(arrivals.trucks)+' trucks/h · '+fmt(arrivals.target)+' min target';
  if(d)renderMetricList(byId('mobilityPreview'),mobilityResults(simulateMobility(d,id,arrivals),m));
@@ -1170,7 +1197,7 @@ function renderMobilityBuilder(){
 }
 mobilityForm.oninput=()=>{byId('mobilityStatus').textContent='';renderMobilityBuilder()};
 mobilityForm.onsubmit=e=>{
- e.preventDefault();const d=mobilityRead(mobilityForm,mobilityFields);if(!d)return;
+ e.preventDefault();const d=formValues(mobilityForm,mobilityFields);if(!d)return;
  try{
   const key=editingMobility||mobilityStorage+crypto.randomUUID();
   localStorage.setItem(key,JSON.stringify(d));fillMobility(d,key);listMobility();byId('mobilityStatus').textContent='Saved '+d.name;
@@ -1181,7 +1208,7 @@ byId('labMobilityBuilder').onclick=()=>openMobilityDesigner(fleetDefault);
 fillMobility(fleetDefault);if(building==='mobility-design')listMobility();
 window.addEventListener('storage',e=>{if(building==='mobility-design'&&(!e.key||e.key.startsWith(mobilityStorage)))listMobility()});
 const mobilitySlots=['A','B'].map(letter=>{
- const custom=mobilityParam('mobility'+letter,mobilityFields);
+ const custom=savedValues('mobility'+letter,mobilityFields);
  const design=custom||(letter==='A'?fleetDefault:{...fleetDefault,name:'Expanded loop and gates',fleet:6,gates:2});
  const card=document.createElement('article');card.className='chart water-summary';
  card.innerHTML='<h3></h3><p class="water-outcome"></p><dl></dl><button>Edit design</button><details><summary>Capacity and event totals</summary><dl></dl></details>';
@@ -1189,7 +1216,7 @@ const mobilitySlots=['A','B'].map(letter=>{
  card.querySelector('button').setAttribute('aria-label','Edit Mobility Design '+letter);
  card.querySelector('button').onclick=()=>openMobilityDesigner(slot.design);byId('mobilityCards').append(card);
  byId('mobilityLoad'+letter).onclick=()=>{
-  const d=mobilityRead(mobilityForm,mobilityFields);if(d){slot.design=d;slot.custom=true;openMobilityLab()}
+  const d=formValues(mobilityForm,mobilityFields);if(d){slot.design=d;slot.custom=true;openMobilityLab()}
  };
  return slot;
 });
@@ -1225,6 +1252,168 @@ byId('queueMetric').onchange=update;
 for(const key of ['mobilityQueues','mobilityBaseline']){
  byId(key).ontoggle=()=>{if(lab&&domain==='mobility'&&byId(key).open)render()};
 }
+const computeFields=[
+ ['capacity','Installed IT capacity (MW)',48,0,2000,'serverFields'],
+ ['overhead','Dry overhead factor (× scenario overhead)',1,0,10,'coolingFields'],
+ ['saving','Overhead saved on assisted load (%)',0,0,100,'coolingFields'],
+ ['wetRate','Water for assisted IT load (L/kWh IT)',0.4,0.01,10,'coolingFields']
+];
+const workFields=[
+ ['load','Incoming workload (MW IT equivalent)',40,0,2000,'computeSharedFields'],
+ ['batch','Work that may wait (%)',25,0,100,'computeSharedFields'],
+ ['feed','Campus power limit (MW)',60,0,5000,'computeSharedFields'],
+ ['water','Cooling water available (L/min)',500,0,1000000,'computeSharedFields'],
+ ['powerPrice','Electricity ($/MWh)',80.5,0,10000,'computeSharedFields'],
+ ['waterPrice','Cooling water ($/1,000 US gal)',reuseDefaults.potableRate,0,1000,'computeSharedFields']
+];
+const computeDefault={name:'Dry cooling',...numericInputs(computeFields)};
+const workDefault=numericInputs(workFields),computeForm=byId('computeForm'),workForm=byId('computeWork');
+let computeWorkload=savedValues('computeWork',workFields)||workDefault;
+fillFields(workForm,computeWorkload);
+const computeEnergy=byId('computeEnergy'),computeWater=byId('computeWater');
+for(const select of [computeEnergy,computeWater]){
+ select.value=['A','B'].includes(saved.get(select.id))?saved.get(select.id):'off';select.onchange=update;
+}
+function applyComputeWork(){
+ const next=formValues(workForm,workFields);if(!next)return;
+ computeWorkload=next;update();byId('computeWorkStatus').textContent='Applied to both designs.';
+}
+workForm.onsubmit=e=>{e.preventDefault();applyComputeWork()};
+workForm.oninput=()=>{byId('computeWorkStatus').textContent='Changes pending.'};
+byId('computeStress').onclick=()=>{workForm.elements.namedItem('feed').value=50;workForm.requestSubmit()};
+const litersPerGallon=3.785411784;
+function simulateCompute(d,id,w){
+ const frames=[],immediate=w.load*(1-w.batch/100),batch=w.load-immediate;
+ const assistedLimit=d.saving>0?w.water*60/(1000*d.wetRate):0;
+ let queue=0,missed=0,served=0,electricity=0,liters=0,peak=0,firstDelay=null;
+ for(let m=0;m<=duration;m++){
+  const dryOverhead=(baseSample(id,m).at('pue')-1)*d.overhead;
+  const usableAssist=dryOverhead>0?assistedLimit:0;
+  const dryRatio=1+dryOverhead,wetRatio=1+dryOverhead*(1-d.saving/100);
+  // The first segment uses assisted cooling. Additional IT load uses dry cooling.
+  const assistedCapacity=Math.min(usableAssist,w.feed/wetRatio);
+  const powerLimitedIT=assistedCapacity+Math.max(0,w.feed-assistedCapacity*wetRatio)/dryRatio;
+  const available=Math.min(d.capacity,powerLimitedIT);
+  const urgent=Math.min(immediate,available);
+  const batchServed=Math.min(batch+queue*60,Math.max(0,available-urgent));
+  const it=urgent+batchServed,assist=Math.min(it,usableAssist);
+  const power=assist*wetRatio+(it-assist)*dryRatio,water=assist*d.wetRate*1000/60,miss=immediate-urgent;
+  if(m){
+   queue=Math.max(0,queue+(batch-batchServed)/60);missed+=miss/60;served+=it/60;
+   electricity+=power/60;liters+=water;
+   if(firstDelay===null&&(miss>epsilon||queue>epsilon))firstDelay=m;
+  }
+  peak=Math.max(peak,power);
+  frames.push({queue,it,power,water,miss,available});
+ }
+ const powerCost=electricity*w.powerPrice,waterCost=liters/litersPerGallon/1000*w.waterPrice;
+ return {frames,missed,served,queue,peak,electricity,liters,firstDelay,powerCost,waterCost,cost:powerCost+waterCost};
+}
+function computeRun(slot,id){
+ if(slot.lastDesign!==slot.design||slot.lastWork!==computeWorkload){
+  slot.runs=new Map();slot.lastDesign=slot.design;slot.lastWork=computeWorkload;
+ }
+ if(!slot.runs.has(id))slot.runs.set(id,simulateCompute(slot.design,id,computeWorkload));
+ return slot.runs.get(id);
+}
+function linkedCompute(select,id){
+ return select.value==='off'?null:computeRun(computeSlots[select.value==='A'?0:1],id);
+}
+function campusWaterRate(run,m){
+ return run&&m<=duration?run.frames[m].water*1440/litersPerGallon/1e6:0;
+}
+function computeMetrics(run,m){
+ return [['Facility power at '+time(m),fmt(run.frames[m].power)+' MW'],['Electricity over 3 hours',fmt(run.electricity)+' MWh'],
+ ['Cooling water over 3 hours',Math.round(run.liters/litersPerGallon).toLocaleString('en-US')+' gal'],
+ ['Immediate work missed',fmt(run.missed)+' MWh IT'],['Batch work waiting at 17:00',fmt(run.queue)+' MWh IT'],
+ ['Electricity and water cost',dollars.format(run.cost)]];
+}
+function computeConditions(id){
+ const w=computeWorkload;
+ return scenarios[id].name+' · '+fmt(w.load)+' MW IT requested · '+fmt(w.feed)+' MW power limit · '+fmt(w.water)+' L/min available';
+}
+const computePrefix='belmont.compute.v1.';
+let editingCompute=null;
+function fillCompute(d,key=null){
+ fillFields(computeForm,d);editingCompute=key;
+ byId('computeSave').textContent=key?'Save changes':'Save design';byId('computeStatus').textContent='';
+}
+function listCompute(){
+ const list=byId('savedCompute');list.replaceChildren();
+ try{
+  for(const key of Object.keys(localStorage).filter(k=>k.startsWith(computePrefix)).sort()){
+   let d;try{d=numericValues(JSON.parse(localStorage.getItem(key)),computeFields,true)}catch{continue}
+   if(!d)continue;
+   const button=document.createElement('button');button.textContent=d.name;
+   button.onclick=()=>{fillCompute(d,key);update();computeForm.elements.namedItem('name').focus()};list.append(button);
+  }
+  if(!list.childElementCount)list.textContent='No saved data center designs yet.';
+ }catch{list.textContent='Saved designs are unavailable in this browser.'}
+}
+function openComputeDesigner(d){
+ fillCompute(d);listCompute();building='compute-design';lab=false;update();computeForm.elements.namedItem('name').focus();
+}
+function openComputeLab(){
+ building=null;lab=true;domain='compute';update();byId('domainBar').querySelector('[value="compute"]').focus();
+}
+function renderComputeBuilder(){
+ const d=formValues(computeForm,computeFields,true),id=selector.value;
+ byId('computePreviewTime').textContent=computeConditions(id);
+ for(const key of ['computeSave','computeLoadA','computeLoadB'])byId(key).disabled=!d;
+ if(d)renderMetricList(byId('computePreview'),computeMetrics(simulateCompute(d,id,computeWorkload),Number(slider.value)));
+ else byId('computePreview').textContent='Enter a name and valid specifications to preview this design.';
+}
+computeForm.oninput=()=>{byId('computeStatus').textContent='';renderComputeBuilder()};
+computeForm.onsubmit=e=>{
+ e.preventDefault();const d=formValues(computeForm,computeFields,true);if(!d)return;
+ try{
+  const key=editingCompute||computePrefix+crypto.randomUUID();localStorage.setItem(key,JSON.stringify(d));
+  fillCompute(d,key);listCompute();byId('computeStatus').textContent='Saved '+d.name;
+ }catch{byId('computeStatus').textContent='Could not save in this browser. You can still test this design.'}
+};
+byId('computeNew').onclick=()=>openComputeDesigner(computeDefault);
+byId('labComputeBuilder').onclick=()=>openComputeDesigner(computeDefault);
+fillCompute(computeDefault);if(building==='compute-design')listCompute();
+window.addEventListener('storage',e=>{if(building==='compute-design'&&(!e.key||e.key.startsWith(computePrefix)))listCompute()});
+const computeSlots=['A','B'].map(letter=>{
+ const custom=savedValues('compute'+letter,computeFields,true);
+ const design=custom||(letter==='A'?computeDefault:{...computeDefault,name:'Water-assisted cooling',saving:35});
+ const card=document.createElement('article');card.className='chart water-summary';
+ card.innerHTML='<h3></h3><p class="water-outcome"></p><dl></dl><div class="water-actions"><button>Edit design</button></div><details><summary>Work delivered and efficiency</summary><dl></dl></details><details><summary>Connect this design to Energy or Water</summary><p>Use its facility power in Energy or its cooling-water demand in Water. Each connection can be reset in the destination lab.</p><div class="water-actions"><button>Test in Energy</button><button>Test in Water</button></div></details>';
+ const slot={letter,design,custom:!!custom,card},[edit,energy,water]=card.querySelectorAll('button');
+ edit.setAttribute('aria-label','Edit Compute Design '+letter);edit.onclick=()=>openComputeDesigner(slot.design);
+ for(const [button,select,target] of [[energy,computeEnergy,'energy'],[water,computeWater,'water']]){
+  button.onclick=()=>{select.value=letter;domain=target;select.closest('details').open=true;update();select.focus()};
+ }
+ byId('computeCards').append(card);
+ byId('computeLoad'+letter).onclick=()=>{
+  const d=formValues(computeForm,computeFields,true);if(d){slot.design=d;slot.custom=true;openComputeLab()}
+ };
+ return slot;
+});
+function renderComputeLab(id,m){
+ byId('computePeriod').textContent=computeConditions(id)+' · 14:00–17:00 MST';
+ for(const slot of computeSlots){
+  const run=computeRun(slot,id),card=slot.card;
+  card.querySelector('h3').textContent='Design '+slot.letter+' · '+slot.design.name;
+  const outcome=card.querySelector('p');
+  outcome.textContent=computeWorkload.load===0?'No incoming workload':run.missed>epsilon?'Immediate work missed':run.queue>epsilon?'Batch work remains at 17:00':run.firstDelay!==null?'Batch backlog cleared by 17:00':'All work served on arrival';
+  outcome.classList.toggle('short',run.missed>epsilon||run.queue>epsilon);
+  renderMetricList(card.querySelector('dl'),computeMetrics(run,m));
+  renderMetricList(card.querySelector('details dl'),[['IT work delivered',fmt(run.served)+' MWh IT'],['First service delay',run.firstDelay===null?'None':time(run.firstDelay)+' MST'],
+   ['Peak facility power',fmt(run.peak)+' MW'],['Event PUE',run.served?fmt(run.electricity/run.served):'No IT work'],
+   ['Event cooling WUE',run.served?fmt(run.liters/(run.served*1000))+' L/kWh IT':'No IT work'],
+   ['Electricity cost',dollars.format(run.powerCost)],['Cooling water cost',dollars.format(run.waterCost)]]);
+ }
+ if(byId('computeTrace').open){
+  const select=byId('computeMetric'),key=select.value,unit={power:'MW',water:'L/min',queue:'MWh IT',miss:'MW IT'}[key];
+  const traces=computeSlots.map(s=>computeRun(s,id).frames.map(f=>f[key]));
+  const reading=time(m)+' MST · '+traces.map((v,i)=>'Design '+computeSlots[i].letter+' '+fmt(v[m])+' '+unit).join(' · ');
+  drawWaterPlot(byId('computePlot'),traces,m,false,unit,reading);byId('computeReading').textContent=reading;
+ }
+}
+byId('computeMetric').onchange=update;
+for(const key of ['computeTrace','computeBaseline'])byId(key).ontoggle=()=>{if(lab&&domain==='compute'&&byId(key).open)render()};
 function render(){
  const minute=Number(slider.value),id=selector.value;
  const frame=sample(id,minute),{end,at,load,battery}=frame;
@@ -1233,26 +1422,31 @@ function render(){
  document.querySelector('nav').hidden=building;byId('note').hidden=building;
  byId('mobilityBuilder').hidden=building!=='mobility-design';
  if(building==='mobility-design')renderMobilityBuilder();
+ byId('computeBuilder').hidden=building!=='compute-design';
+ if(building==='compute-design')renderComputeBuilder();
  if(building==='battery')renderBuilder();
  if(building==='water-design')renderWaterBuilder();
 
  byId('opsTab').setAttribute('aria-pressed',String(!lab&&!building));byId('labTab').setAttribute('aria-pressed',String(lab));
- document.querySelector('h1').textContent=building==='mobility-design'?'Mobility System Design':building==='water-design'?'Water System Design':building==='battery'?'Battery Design':lab?'Scenario Lab':'City Operations';
+ document.querySelector('h1').textContent=building==='compute-design'?'Data Center Design':building==='mobility-design'?'Mobility System Design':building==='water-design'?'Water System Design':building==='battery'?'Battery Design':lab?'Scenario Lab':'City Operations';
  document.title='Belmont | '+document.querySelector('h1').textContent;
  byId('testLoad').hidden=lab;
  byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=['energy','overview'].includes(domain);
  const baseline=byId('waterBaseline'),reference=byId('referenceControl'),study=byId('domainStudy');
- const referenceFold=domain==='water'?baseline:domain==='mobility'?byId('mobilityBaseline'):null;
+ const referenceFold={water:baseline,mobility:byId('mobilityBaseline'),compute:byId('computeBaseline')}[domain];
  if(referenceFold&&study.parentElement!==referenceFold)referenceFold.append(reference,study);
  if(!referenceFold&&study.parentElement!==byId('lab')){baseline.after(reference);byId('energyStudy').after(study)}
  byId('mobilityLab').hidden=domain!=='mobility';
+ byId('computeLab').hidden=domain!=='compute';
  baseline.hidden=domain!=='water';byId('overview').hidden=domain!=='overview';reference.hidden=domain==='energy';
  byId('waterExperiment').hidden=domain!=='water';byId('waterLab').hidden=domain!=='water';
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
  if(lab && domain==='energy'){
+  const campus=linkedCompute(computeEnergy,id);
+  byId('computeEnergyRead').textContent=campus?'Compute Design '+computeEnergy.value+' replaces the baseline campus with '+fmt(campus.frames[minute].power)+' MW at '+time(minute)+' MST. Both batteries see the revised city load.':'Both batteries include the baseline dry campus. Select a design to replace its load in the city forecast.';
   const selected=waterSlots[waterEnergy.selectedIndex-1];
   const importSetting=extraImport.value==='0'?'off':extraImport.value==='full'?'full coverage':extraImport.value+' MW limit';
-  byId('energyPeriod').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST · Extra imports '+importSetting+(selected?' · Water Design '+selected.slot+' connected':'');
+  byId('energyPeriod').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST · Extra imports '+importSetting+(campus?' · Compute Design '+computeEnergy.value:'')+(selected?' · Water Design '+selected.slot+' connected':'');
   if(selected){
    const run=waterRun(selected,id),f=run.frames[minute];
    byId('waterEnergyRead').textContent='Design '+selected.slot+' · '+selected.design.name+' adds '+fmt(f.waterMW)+' MW at '+time(minute)+' MST ('+fmt(f.pumpMW)+' MW pumping and '+fmt(f.treatmentMW)+' MW treatment). Three-hour electricity: '+fmt(run.electricity)+' MWh.';
@@ -1269,6 +1463,11 @@ function render(){
  if(lab && !byId('domainStudy').hidden)renderStudy(id,minute,bands);
  if(lab && domain==='water'){renderConservation(averageDemand*at('water'));renderWaterLab(id,minute)}
  if(lab && domain==='mobility')renderMobilityLab(id,minute);
+ if(lab && domain==='compute')renderComputeLab(id,minute);
+ if(lab && domain==='water'){
+  const campus=linkedCompute(computeWater,id);
+  byId('computeWaterRead').textContent=campus?'Compute Design '+computeWater.value+' requests '+fmt(campus.frames[minute].water)+' L/min at '+time(minute)+' MST. Both water designs include the campus as additional potable demand during the three-hour event. Cooling uses its own water allowance. City shortfalls do not feed back into server operation.':'The baseline dry campus uses zero on-site cooling water. Select a compute design to test its event demand.';
+ }
  const grid=byId('grid');
  if(!grid.children.length) for(const [name,rows,info] of bands){
    const article=document.createElement('article');
@@ -1289,10 +1488,19 @@ function render(){
     section.querySelector('button').onclick=openMobilityLab;section.querySelectorAll('button')[1].onclick=()=>openMobilityDesigner(mobilitySlots[0].design);
     article.append(section);
    }
+   if(name==='Data / Compute'){
+    article.querySelector('dt').textContent='Baseline facility power';
+    const section=document.createElement('section');section.className='water-summary';
+    section.innerHTML='<h3>Modeled campus · Design A</h3><p></p><dl id="computeOps"></dl><div class="water-actions"><button>Test this workload</button><button>Design a data center</button></div>';
+    section.querySelector('button').onclick=openComputeLab;section.querySelectorAll('button')[1].onclick=()=>openComputeDesigner(computeSlots[0].design);article.append(section);
+   }
    grid.append(article);
  }
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
  if(!lab&&!building){
+  const computeSlot=computeSlots[0],cf=computeRun(computeSlot,id).frames[minute],details=byId('computeOps');
+  details.previousElementSibling.textContent=computeSlot.design.name;
+  renderMetricList(details,[['IT load served',fmt(cf.it)+' MW'],['Facility power',fmt(cf.power)+' MW'],['Cooling water',fmt(cf.water)+' L/min'],['Batch work waiting',fmt(cf.queue)+' MWh IT']]);
   const mobility=mobilitySlots[0],mf=mobilityRun(mobility,id).frames[minute],ops=byId('mobilityOps');
   ops.previousElementSibling.textContent=mobility.design.name;
   renderMetricList(ops,[['Shuttle interval / target',shuttleInterval(mf.interval)+' / '+fmt(arrivals.target)+' min'],
@@ -1318,6 +1526,9 @@ function render(){
  for(const d of designs)if(d.custom)hash+='&'+d.name+'design='+encodeURIComponent(JSON.stringify(d.custom));
  for(const slot of waterSlots)if(slot.custom)hash+='&water'+slot.slot+'='+encodeURIComponent(JSON.stringify(slot.design));
  for(const slot of mobilitySlots)if(slot.custom)hash+='&mobility'+slot.letter+'='+encodeURIComponent(JSON.stringify(slot.design));
+ for(const slot of computeSlots)if(slot.custom)hash+='&compute'+slot.letter+'='+encodeURIComponent(JSON.stringify(slot.design));
+ if(Object.keys(workDefault).some(k=>computeWorkload[k]!==workDefault[k]))hash+='&computeWork='+encodeURIComponent(JSON.stringify(computeWorkload));
+ for(const select of [computeEnergy,computeWater])if(select.value!=='off')hash+='&'+select.id+'='+select.value;
  if(Object.keys(arrivalsDefault).some(k=>arrivals[k]!==arrivalsDefault[k]))hash+='&arrivals='+encodeURIComponent(JSON.stringify(arrivals));
  if(waterFlowSelect.value==='B')hash+='&waterFlow=B';
  if(waterEnergy.value!=='off')hash+='&waterEnergy='+waterEnergy.value;
@@ -1331,7 +1542,7 @@ for(const id of ['energyShortfall','energySizing','energySupply']){
 }
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{building=false;lab=false;update()};
-byId('labTab').onclick=()=>{if(!lab)domain=building==='mobility-design'?'mobility':building==='water-design'?'water':building==='battery'?'energy':'overview';building=false;lab=true;update()};
+byId('labTab').onclick=()=>{if(!lab)domain=building==='compute-design'?'compute':building==='mobility-design'?'mobility':building==='water-design'?'water':building==='battery'?'energy':'overview';building=false;lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
 // Scale the drawing surface to its layout width on high-density screens.
 function surface(canvas){
