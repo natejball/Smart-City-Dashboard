@@ -92,10 +92,27 @@ body.capture{background:#fff}
 .sizing p,.supply p{margin:8px 0}.sizeScroll{overflow-x:auto}#sizeGrid{border-collapse:separate;border-spacing:4px;width:100%;max-width:760px;font-variant-numeric:tabular-nums}#sizeGrid caption{text-align:left;font-weight:600;margin:5px 0}#sizeGrid th{font-size:13px}#sizeGrid button{width:100%;min-height:34px;padding:4px;background:#fff8efb8;border-color:#927e69}#sizeGrid button.covered{background:#d3eee1}#sizeGrid button[aria-pressed=true]{background:#184a40;color:white;outline:2px solid #184a40;outline-offset:1px}#sizeGrid button:focus-visible{outline:3px solid #00459d}#supplyKey{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0}#supplyKey span{display:inline-flex;align-items:center;gap:5px;font-size:14px}#supplyKey i{width:16px;height:9px;border-radius:2px}#supplyKey .loadLine{height:2px;background:#19342f}#supplyRead{font-variant-numeric:tabular-nums}
 @media(max-width:460px){#sizeGrid{border-spacing:2px}#sizeGrid button{font-size:13px;padding:3px 1px}.sizing{padding:10px}}
 #purchases{margin:12px 0}#purchases h3{margin:0 0 10px}#purchases label{flex-wrap:wrap}#purchases p{max-width:82ch}.purchaseCost{padding:8px 0 2px;border-top:1px solid #38544755;font-variant-numeric:tabular-nums}
+.builder-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.builder-layout .chart,.savedPanel{background:#faf9efc9;backdrop-filter:blur(5px);border:1px solid #fff9;border-radius:12px;padding:18px}
+#batteryForm label{display:flex;justify-content:space-between;gap:12px;margin:12px 0}#batteryForm input{font:inherit;border:1px solid #72857a;border-radius:5px;padding:6px;width:42%;max-width:220px;background:#fffdf4}#bdMetrics dt,#bdMetrics dd{white-space:normal}#bdMetrics dd{text-align:right}.builder-actions,#savedBatteries{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.savedPanel{margin:14px 0}#openBuilder{margin-top:10px}.customSpec:empty{display:none}#builderStatus{display:block}button:disabled{opacity:.55;cursor:default}@media(max-width:710px){.builder-layout{grid-template-columns:1fr}}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
-<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
+<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="builder" hidden aria-label="Battery design editor">
+<div class="builder-layout"><form id="batteryForm" class="chart"><h2>Design specifications</h2>
+<label>Design name<input id="bdName" maxlength="64" required value="Four-hour battery"></label>
+<label>Discharge power (MW)<input id="bdPower" type="number" required min="0.01" max="100000" step="any" value="60"></label>
+<label>Usable capacity (MWh)<input id="bdCapacity" type="number" required min="0.01" max="1000000" step="any" value="240"></label>
+<label>Starting charge (%)<input id="bdCharge" type="number" required min="0" max="100" step="any" value="100"></label>
+<details><summary>Capital cost assumptions</summary>
+<label>Power cost ($/kW)<input id="bdPowerCost" type="number" required min="0" max="100000" step="any" value="345"></label>
+<label>Energy cost ($/kWh)<input id="bdEnergyCost" type="number" required min="0" max="100000" step="any" value="162"></label>
+<p>Default rates reproduce the 2025 mid-case projection for a 60 MW system: $669/kW at two hours and $993/kW at four hours. Other sizes use the same linear estimate. Edit the rates for a project-specific budget. <a href="https://www.nrel.gov/docs/fy21osti/77449.pdf" target="_blank" rel="noopener">NREL Storage Futures Study, Table A-3</a></p></details>
+<div class="builder-actions"><button type="submit" id="saveDesign">Save design</button><button type="button" id="newDesign">New design</button></div>
+<span id="builderStatus" role="status"></span></form>
+<section class="chart"><h2>Design performance</h2><canvas class="pack" id="bdPack" aria-label="Battery starting charge"></canvas><dl id="bdMetrics"></dl>
+<div class="builder-actions"><button id="loadA">Test as Design A</button><button id="loadB">Test as Design B</button></div></section></div>
+<section class="chart savedPanel"><h2>Saved designs</h2><p>Saved in this browser on this device. Open a design to edit or test it.</p><div id="savedBatteries"></div></section></section>
+<section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
 <section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><section class="chart" id="purchases"><h3>Supplemental grid purchases</h3>
@@ -153,6 +170,12 @@ function sample(id,minute){
  const battery=Math.max(0,load-at('solar')-design.gridImportLimit);
  return {end,at,compute,load,battery};
 }
+let building=saved.get('view')==='battery';
+const limits=[100000,1000000,100];
+function setRating(select,index,value){
+ if(!Array.from(select.options).some(option=>Number(option.value)===value))select.add(new Option(value+[' MW',' MWh','%'][index],value));
+ select.value=String(value);
+}
 let lab=saved.get('view')==='lab';
 const options=[['Power limit (MW)',[0,50,100,150,200]],['Usable energy (MWh)',[0,25,50,100,200]],['Starting charge (%)',[0,25,50,75,100]]];
 const designs=['A','B'].map((name,i)=>{
@@ -163,7 +186,8 @@ const designs=['A','B'].map((name,i)=>{
   field.textContent=label;
   values.forEach(v=>select.add(new Option(v+[' MW',' MWh','%'][j],v)));
   const key=name+j, stored=saved.get(key);
-  select.value=stored!==null && values.includes(Number(stored))?Number(stored):[[100,100,100],[150,100,100]][i][j];
+  const parsed=Number(stored);
+  setRating(select,j,stored!==null&&stored.trim()!==''&&Number.isFinite(parsed)&&parsed>=0&&parsed<=limits[j]?parsed:[[100,100,100],[150,100,100]][i][j]);
   select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);card.append(field);return select;
  });
  const pack=document.createElement('canvas');pack.className='pack';pack.setAttribute('aria-label','Battery enclosure showing remaining stored energy');
@@ -187,7 +211,10 @@ const designs=['A','B'].map((name,i)=>{
  orient();
  angle.oninput=()=>{orient();drawPack(pack,view.angle,view.charge)};
  const output=document.createElement('div');card.append(output);byId('designs').append(card);
- return {name,controls,summary,output,pack,info,meter,view};
+ const spec=document.createElement('p');spec.className='customSpec';card.querySelector('h2').after(spec);
+ let custom=null;
+ try{const candidate=JSON.parse(saved.get(name+'design'));if(validBattery(candidate)&&[candidate.power,candidate.capacity,candidate.charge].every((v,j)=>v===Number(controls[j].value)))custom=candidate}catch{}
+ return {name,controls,summary,output,pack,info,meter,view,spec,custom};
 });
 const time=m=>(14+Math.floor(m/60))+':'+String(m%60).padStart(2,'0');
 const epsilon=0.00001;
@@ -227,6 +254,10 @@ function dispatch(designCase,series,cursor){
  const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
  designCase.summary.textContent=power+' MW · '+capacity+' MWh · '+charge+'% starting charge';
  const extraLimit=extraImport.value==='full'?Infinity:Number(extraImport.value);
+ const custom=designCase.custom;
+ if(custom&&(power!==custom.power||capacity!==custom.capacity||charge!==custom.charge))designCase.custom=null;
+ designCase.spec.hidden=!designCase.custom;
+ if(designCase.custom)designCase.spec.textContent=custom.name+' · '+money(capital(custom))+' capital estimate · '+fmt(capacity/power)+' h at rated power';
  const result=simulateBattery(power,capacity,charge,series,cursor,extraLimit);
  const {gaps,first,peak,unserved,current}=result;
  designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
@@ -496,13 +527,78 @@ function renderStudy(id,minute,bands){
  });
  knots.forEach(m=>draw('text',{x:xAt(m),y:171,'text-anchor':m===0?'start':m===duration?'end':'middle'},time(m)));
 }
+const storagePrefix='belmont.battery.v1.';
+const batteryForm=byId('batteryForm'),fields=['name','power','capacity','charge','powerCost','energyCost'];
+const inputs=[...batteryForm.querySelectorAll('input')];
+const money=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:3});
+const capital=d=>1000*(d.power*d.powerCost+d.capacity*d.energyCost);
+let editing=null;
+function validBattery(d){
+ return d&&typeof d.name==='string'&&d.name.trim().length>0&&d.name.length<=64&&
+ ['power','capacity','charge','powerCost','energyCost'].every((k,i)=>Number.isFinite(d[k])&&d[k]>=(i<2?.01:0)&&d[k]<=[100000,1000000,100,100000,100000][i]);
+}
+function readBattery(){
+ return Object.fromEntries(fields.map((k,i)=>[k,i?inputs[i].valueAsNumber:inputs[i].value.trim()]));
+}
+function renderBuilder(){
+ const d=readBattery(),ok=validBattery(d);
+ for(const id of ['saveDesign','loadA','loadB'])byId(id).disabled=!ok;
+ drawPack(byId('bdPack'),-.52,ok?d.charge/100:0);
+ const metrics=byId('bdMetrics');metrics.replaceChildren();
+ if(!ok){metrics.textContent='Enter valid specifications to see performance.';return}
+ const id=selector.value,series=Array.from({length:duration+1},(_,m)=>sample(id,m));
+ const end=simulateBattery(d.power,d.capacity,d.charge,series,duration).current;
+ const stored=d.capacity*d.charge/100;
+ for(const [label,value] of [
+ ['Estimated capital cost',money(capital(d))],['Full-charge duration at rated power',fmt(d.capacity/d.power)+' h'],
+ ['Starting stored energy',fmt(stored)+' MWh'],['Runtime from starting charge',fmt(stored/d.power)+' h'],
+ ['Discharge throughput over 3 h',fmt(stored-end.remaining)+' MWh']]){
+  const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;row.append(dt,dd);metrics.append(row);
+ }
+ const caption=document.createElement('p');caption.textContent='Throughput is the energy delivered in the '+scenarios[id].name+' scenario, 14:00–17:00 MST.';metrics.append(caption);
+}
+function listBatteries(){
+ const list=byId('savedBatteries');list.replaceChildren();
+ try{
+  const items=[];
+  for(const key of Object.keys(localStorage).filter(k=>k.startsWith(storagePrefix))){
+   try{const data=JSON.parse(localStorage.getItem(key));if(validBattery(data))items.push([key,data])}catch{}
+  }
+  items.sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  for(const [key,d] of items){
+   const item=document.createElement('button');item.textContent=d.name+' · '+fmt(d.power)+' MW / '+fmt(d.capacity)+' MWh';
+   item.onclick=()=>{editing=key;fields.forEach((k,i)=>inputs[i].value=d[k]);byId('saveDesign').textContent='Save changes';byId('builderStatus').textContent='Editing '+d.name;renderBuilder();byId('bdName').focus()};list.append(item);
+  }
+  if(!items.length)list.textContent='No saved designs yet.';
+ }catch{list.textContent='Browser storage is unavailable. You can still test a design in the lab.'}
+}
+batteryForm.oninput=()=>{byId('builderStatus').textContent='';renderBuilder()};
+batteryForm.onsubmit=e=>{
+ e.preventDefault();const d=readBattery();if(!validBattery(d))return;
+ try{
+  const key=editing||storagePrefix+crypto.randomUUID();localStorage.setItem(key,JSON.stringify(d));editing=key;
+  byId('saveDesign').textContent='Save changes';byId('builderStatus').textContent='Saved '+d.name;listBatteries();
+ }catch{byId('builderStatus').textContent='Could not save in this browser. You can still test this design.'}
+};
+byId('newDesign').onclick=()=>{editing=null;batteryForm.reset();byId('saveDesign').textContent='Save design';byId('builderStatus').textContent='New design';renderBuilder();inputs[0].focus()};
+for(const slot of designs)byId('load'+slot.name).onclick=()=>{
+ const d=readBattery();if(!validBattery(d))return;
+ [d.power,d.capacity,d.charge].forEach((v,j)=>{setRating(slot.controls[j],j,v);slot.controls[j].dataset.changed='1'});
+ slot.custom=d;supplySelect.value=slot.name;building=false;lab=true;domain='energy';update();byId('labTab').focus();
+};
+window.addEventListener('storage',e=>{if(building&&(!e.key||e.key.startsWith(storagePrefix)))listBatteries()});
+if(building)listBatteries();
 function render(){
  const minute=Number(slider.value),id=selector.value;
  const frame=sample(id,minute),{end,at,load,battery}=frame;
  drawDesert(id,intensity(id,minute));
- byId('grid').hidden=lab;byId('lab').hidden=!lab;
- byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
- document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
+ byId('grid').hidden=lab||building;byId('lab').hidden=!lab;byId('builder').hidden=!building;
+ document.querySelector('nav').hidden=building;byId('note').hidden=building;
+ if(building)renderBuilder();
+
+ byId('opsTab').setAttribute('aria-pressed',String(!lab&&!building));byId('labTab').setAttribute('aria-pressed',String(lab));
+ document.querySelector('h1').textContent=building?'Battery Design':lab?'Scenario Lab':'City Operations';
  document.title='Belmont | '+document.querySelector('h1').textContent;
  byId('testLoad').hidden=lab;
  byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=['energy','overview'].includes(domain);
@@ -523,6 +619,10 @@ function render(){
  if(!grid.children.length) for(const [name,rows,info] of bands){
    const article=document.createElement('article');
    article.innerHTML='<h2>'+name+'</h2><dl>'+rows.map(([label])=>'<div><dt>'+label+'</dt><dd></dd></div>').join('')+'</dl><details><summary>Metric notes</summary><p>'+info+'</p></details>';
+   if(name==='Energy'){
+    const open=document.createElement('button');open.id='openBuilder';open.textContent='Design a battery';article.append(open);
+    open.onclick=()=>{building=true;lab=false;listBatteries();update();byId('bdName').focus()};
+   }
    grid.append(article);
  }
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
@@ -532,6 +632,7 @@ function render(){
  byId('basis').textContent='Design basis · '+design.population.toLocaleString('en-US')+' residents · '+design.homes.toLocaleString('en-US')+' homes · '+design.gpcd+' GPCD · '+averageDemand+' MGD average demand · '+Math.round(design.cityPeak+design.itLoad*design.peakPue)+' MW combined planning peak';
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
+ if(building)hash+='&view=battery';
  if(lab)hash+='&view=lab';
  if(extraImport.value!=='0')hash+='&extra='+extraImport.value;
  if(lab && supplySelect.value==='A')hash+='&supply=A';
@@ -539,11 +640,12 @@ function render(){
  if(lab && !byId('domainStudy').hidden)hash+='&metric='+metric.value;
  if(lab && (domain==='water'||reduction.value!=='10'))hash+='&reduction='+reduction.value;
  for(const d of designs)d.controls.forEach((el,j)=>{if(lab||saved.has(d.name+j)||el.dataset.changed)hash+='&'+d.name+j+'='+el.value});
+ for(const d of designs)if(d.custom)hash+='&'+d.name+'design='+encodeURIComponent(JSON.stringify(d.custom));
  if(location.hash!==hash) location.replace(hash);
 }
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
-byId('opsTab').onclick=()=>{lab=false;update()};
-byId('labTab').onclick=()=>{if(!lab)domain='overview';lab=true;update()};
+byId('opsTab').onclick=()=>{building=false;lab=false;update()};
+byId('labTab').onclick=()=>{if(!lab)domain=building?'energy':'overview';building=false;lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
 // Scale the drawing surface to its layout width on high-density screens.
 function surface(canvas){
