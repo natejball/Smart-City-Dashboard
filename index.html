@@ -89,13 +89,18 @@ body.capture{background:#fff}
 .water-bars{max-width:640px;font-variant-numeric:tabular-nums}.water-bars>div:not(.water-track){display:flex;justify-content:space-between;gap:10px}.water-track{position:relative;height:10px;background:#293b3520;border-radius:3px;margin:5px 0 12px}.water-track i{height:100%;display:block;background:#54706c;border-radius:3px}#adjustedBar{background:#00766b}.water-track:after{content:'';position:absolute;top:-3px;bottom:-3px;left:var(--supply);border-left:2px solid #312f25}#waterOutcome{margin-bottom:0}
 @media(max-width:520px){#overview td,#overview th{padding:6px 3px;font-size:14px}#overview button{font-size:14px}}
 @media print{#referenceControl,#reduction{display:none}#overview,#waterExperiment{background:white;break-inside:avoid}}
+.sizing p,.supply p{margin:8px 0}.sizeScroll{overflow-x:auto}#sizeGrid{border-collapse:separate;border-spacing:4px;width:100%;max-width:760px;font-variant-numeric:tabular-nums}#sizeGrid caption{text-align:left;font-weight:600;margin:5px 0}#sizeGrid th{font-size:13px}#sizeGrid button{width:100%;min-height:34px;padding:4px;background:#fff8efb8;border-color:#927e69}#sizeGrid button.covered{background:#d3eee1}#sizeGrid button[aria-pressed=true]{background:#184a40;color:white;outline:2px solid #184a40;outline-offset:1px}#sizeGrid button:focus-visible{outline:3px solid #00459d}#supplyKey{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0}#supplyKey span{display:inline-flex;align-items:center;gap:5px;font-size:14px}#supplyKey i{width:16px;height:9px;border-radius:2px}#supplyKey .loadLine{height:2px;background:#19342f}#supplyRead{font-variant-numeric:tabular-nums}
+@media(max-width:460px){#sizeGrid{border-spacing:2px}#sizeGrid button{font-size:13px;padding:3px 1px}.sizing{padding:10px}}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
 <p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
-<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
+<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Battery sizing experiment</h2><div class="chart sizing"><p id="sizingNote"></p>
+<div class="sizeScroll"><table id="sizeGrid"><caption>Unserved energy over three hours (MWh)</caption><thead></thead><tbody></tbody></table></div><p id="sizeTarget"></p></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><h2>Energy supply and demand</h2><div class="chart supply">
+<label>Battery design <select id="supplyDesign"><option value="A">Design A</option><option value="B" selected>Design B</option></select></label>
+<div id="supplyKey"></div><svg id="supplyChart" role="img" aria-label="Power balance by source"></svg><p id="supplyRead"></p></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
 <h2 id="studyTitle"></h2><p id="finding"></p>
 <section id="waterExperiment" hidden><h3>Water conservation experiment</h3>
 <label for="reduction">Hypothetical demand reduction <output id="reductionValue" for="reduction"></output></label>
@@ -191,9 +196,7 @@ function diagnosis(required,current,power){
  if(current.delivered+epsilon<power)return 'The battery exhausts its available energy this minute, leaving '+unmet;
  return 'Output reaches the '+power+' MW limit with '+current.remaining.toFixed(1)+' MWh remaining, leaving '+unmet;
 }
-function dispatch(designCase,series,cursor){
- const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
- designCase.summary.textContent=power+' MW · '+capacity+' MWh · '+charge+'% starting charge';
+function simulateBattery(power,capacity,charge,series,cursor){
  let remaining=capacity*charge/100,unserved=0,first=null,peak=0;
  const gaps=[];let current;
  series.forEach((s,m)=>{
@@ -205,13 +208,103 @@ function dispatch(designCase,series,cursor){
   peak=Math.max(peak,gap);gaps.push(gap);
   if(m===cursor)current={gap,remaining,delivered,available};
  });
+ return {gaps,first,peak,unserved,current};
+}
+function dispatch(designCase,series,cursor){
+ const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
+ designCase.summary.textContent=power+' MW · '+capacity+' MWh · '+charge+'% starting charge';
+ const result=simulateBattery(power,capacity,charge,series,cursor);
+ const {gaps,first,peak,unserved,current}=result;
  designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
  const fraction=capacity?current.remaining/capacity:0;
  designCase.view.charge=fraction;
  drawPack(designCase.pack,designCase.view.angle,fraction);
  designCase.info.textContent=current.remaining.toFixed(1)+' / '+capacity+' MWh stored · '+current.delivered.toFixed(1)+' / '+power+' MW output';
  designCase.meter.max=power||1;designCase.meter.value=current.delivered;
- return {gaps,first};
+ return result;
+}
+const sizeGrid=byId('sizeGrid'),powerOptions=options[0][1],capacityOptions=options[1][1];
+sizeGrid.tHead.innerHTML='<tr><th scope="col">MW ↓<br>MWh →</th>'+capacityOptions.map(n=>'<th scope="col">'+n+'</th>').join('')+'</tr>';
+const sizeCells=[];
+for(const power of powerOptions){
+ const row=sizeGrid.tBodies[0].insertRow();row.innerHTML='<th scope="row">'+power+'</th>';
+ for(const capacity of capacityOptions){
+  const cell=document.createElement('button');cell.type='button';row.insertCell().append(cell);
+  cell.onclick=()=>{
+   const controls=designs[1].controls;
+   controls[0].value=power;controls[1].value=capacity;
+   controls[0].dataset.changed=controls[1].dataset.changed='1';
+   byId('supplyDesign').value='B';update();
+  };
+  sizeCells.push({cell,power,capacity});
+ }
+}
+let lastSizing='';
+function renderSizing(id,series){
+ const [selectedPower,selectedCapacity,charge]=designs[1].controls.map(el=>Number(el.value));
+ const key=id+'/'+charge;
+ if(lastSizing!==key){
+  byId('sizingNote').textContent='Select a cell to test its power and capacity in Design B at '+charge+'% starting charge.';
+  let covered=false;
+  for(const {cell,power,capacity} of sizeCells){
+   const result=simulateBattery(power,capacity,charge,series,0);
+   const complete=result.first===null;
+   covered ||= complete;
+   cell.textContent=complete?'0':result.unserved<.05?'<0.1':result.unserved.toFixed(1);
+   cell.classList.toggle('covered',complete);
+   cell.setAttribute('aria-label',power+' MW, '+capacity+' MWh: '+cell.textContent+' MWh unserved. Load into Design B.');
+  }
+  const requiredPower=Math.max(...series.map(s=>s.battery));
+  const requiredEnergy=series.slice(1).reduce((total,s)=>total+s.battery/60,0);
+  const roundUp=n=>(Math.ceil(n*10-1e-8)/10).toFixed(1);
+  let target='Solar and grid imports cover the full run without storage.';
+  if(requiredPower>epsilon){
+   target='Full coverage needs at least '+roundUp(requiredPower)+' MW of discharge power and '+roundUp(requiredEnergy)+' MWh of stored energy at the start.';
+   if(charge){
+    const capacity=requiredEnergy*100/charge;
+    target+=' At '+charge+'% starting charge, that requires '+roundUp(capacity)+' MWh of usable capacity.';
+    if(!covered)target+=' Beyond the largest grid option, add '+roundUp(Math.max(0,capacity-Math.max(...capacityOptions)))+' MWh of capacity'+(requiredPower>Math.max(...powerOptions)?' and '+roundUp(requiredPower-Math.max(...powerOptions))+' MW of power':'')+'.';
+   }else target+=' Increase starting charge to test a design that can supply this energy.';
+  }
+  byId('sizeTarget').textContent=target;lastSizing=key;
+ }
+ for(const {cell,power,capacity} of sizeCells)cell.setAttribute('aria-pressed',String(power===selectedPower&&capacity===selectedCapacity));
+}
+const sources=[['Solar','#c08b2f'],['Grid imports','#708aac'],['Battery','#268674'],['Unmet demand','#bb5b4b']];
+byId('supplyKey').innerHTML=sources.map(([name,color])=>'<span><i style="background:'+color+'"></i>'+name+'</span>').join('')+'<span><i class="loadLine"></i>Total demand</span>';
+const supplySelect=byId('supplyDesign');
+supplySelect.value=saved.get('supply')==='A'?'A':'B';
+supplySelect.onchange=update;
+function drawSupply(series,results,minute){
+ const svg=byId('supplyChart'),width=Math.max(240,svg.clientWidth),left=42,right=width-15,top=24,bottom=176;
+ const gaps=results[supplySelect.selectedIndex].gaps;
+ const maximum=Math.ceil(Math.max(...series.map(s=>s.load))/100)*100;
+ const x=m=>left+(right-left)*m/duration,y=v=>bottom-(bottom-top)*v/maximum;
+ const frames=series.slice(0,minute+1).map((s,m)=>{
+  const solar=Math.min(s.at('solar'),s.load),grid=s.load-solar-s.battery;
+  return [0,solar,solar+grid,s.load-gaps[m],s.load];
+ });
+ svg.setAttribute('viewBox','0 0 '+width+' 205');svg.replaceChildren();
+ function add(tag,attrs,content){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const [key,val] of Object.entries(attrs))el.setAttribute(key,val);
+  if(content!==undefined)el.textContent=content;svg.append(el);
+ }
+ for(const value of [0,maximum/2,maximum]){
+  add('line',{x1:left,x2:right,y1:y(value),y2:y(value),class:'gridline'});
+  add('text',{x:left-5,y:y(value)+4,'text-anchor':'end'},value);
+ }
+ add('text',{x:left-4,y:13,'text-anchor':'end'},'MW');
+ for(const m of [0,60,120,180])add('text',{x:x(m),y:198,'text-anchor':m===0?'start':m===duration?'end':'middle'},time(m));
+ sources.forEach(([,color],i)=>{
+  const upper=frames.map((v,m)=>x(m)+','+y(v[i+1]));
+  const lower=frames.map((v,m)=>x(m)+','+y(v[i])).reverse();
+  add('polygon',{points:upper.concat(lower).join(' '),fill:color});
+ });
+ add('polyline',{points:frames.map((v,m)=>x(m)+','+y(v[4])).join(' '),fill:'none',stroke:'#19342f','stroke-width':2});
+ const current=frames[minute];add('circle',{cx:x(minute),cy:y(current[4]),r:3.5,fill:'#19342f'});
+ const reading=time(minute)+' MST · Design '+supplySelect.value+' · '+sources.map(([name],i)=>name+' '+(current[i+1]-current[i]).toFixed(1)+' MW').join(' · ')+' · Total '+current[4].toFixed(1)+' MW';
+ byId('supplyRead').textContent=reading;svg.setAttribute('aria-label',reading);
 }
 function drawChart(results,cursor){
  const lines=results.map(result=>result.gaps);
@@ -402,7 +495,8 @@ function render(){
  if(lab && domain==='energy'){
   byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
   const series=Array.from({length:duration+1},(_,m)=>sample(id,m));
-  drawChart(designs.map(d=>dispatch(d,series,minute)),minute);
+  const results=designs.map(d=>dispatch(d,series,minute));
+  drawChart(results,minute);renderSizing(id,series);drawSupply(series,results,minute);
  }
  const bands=domainReadings(frame);
  if(lab && domain==='overview')renderOverview(id,minute,bands);
@@ -422,6 +516,7 @@ function render(){
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
  if(lab)hash+='&view=lab';
+ if(lab && supplySelect.value==='A')hash+='&supply=A';
  if(lab)hash+='&domain='+domain+'&compare='+compare.value;
  if(lab && !byId('domainStudy').hidden)hash+='&metric='+metric.value;
  if(lab && (domain==='water'||reduction.value!=='10'))hash+='&reduction='+reduction.value;
