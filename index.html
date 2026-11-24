@@ -21,9 +21,9 @@ option{background:#fffdf5;color:#142e29}
 :focus-visible{outline:3px solid #003e80;outline-offset:3px}
 input[type=range]{accent-color:#165a50}
 #lab{background:transparent;padding:0}
-#note,#balance,#lab>h2,#lab>p,#basis,main>details,#lab>details{background:#fbf9eff0;color:#1a332e;border-radius:5px;padding:7px 12px;width:fit-content;max-width:100%}
-#lab>h2{margin-bottom:6px}
-#lab>p{margin:6px 0 12px}
+#note,#balance, :is(#lab,#energyStudy)>h2, :is(#lab,#energyStudy)>p,#basis,main>details, :is(#lab,#energyStudy)>details{background:#fbf9eff0;color:#1a332e;border-radius:5px;padding:7px 12px;width:fit-content;max-width:100%}
+ :is(#lab,#energyStudy)>h2{margin-bottom:6px}
+ :is(#lab,#energyStudy)>p{margin:6px 0 12px}
 .designs{gap:clamp(18px,3vw,48px)}
 .designs article{padding:14px 18px}
 .designs article h2{margin:0 0 8px!important}
@@ -50,7 +50,7 @@ body.capture{background:#fff}
 @media print{body.capture main{max-width:none;padding:0}#restore{display:none!important}.capture .designs{grid-template-columns:1fr 1fr}.capture article{padding:10px}.capture #grid{gap:8px}.capture footer{font-size:10px}}
 
 @media screen{
- body:not(.capture) :is(#grid article,#note,#balance,#lab>h2,#lab>p,#lab>details,main>details,#basis,.designs article,.chart){
+ body:not(.capture) :is(#grid article,#note,#balance, :is(#lab,#energyStudy)>h2, :is(#lab,#energyStudy)>p, :is(#lab,#energyStudy)>details,main>details,#basis,.designs article,.chart){
   color:#142d29;background:rgba(251,250,241,.59);backdrop-filter:blur(5px);
   border:1px solid #ffffffa6;border-top-color:#ffffffe6;border-radius:10px;
   box-shadow:inset 0 1px #ffffff55,0 2px 10px #24332f16;
@@ -59,8 +59,8 @@ body.capture{background:#fff}
  body:not(.capture) :is(#share,#tabs button:not([aria-pressed=true])){background:#fffdf2a8;backdrop-filter:blur(5px)}
  #grid dl div,.result{border-color:#344d412b}
  details summary{margin:0;color:#163f35}
- #lab>details{margin:12px 0}
- @supports not (backdrop-filter:blur(5px)){body:not(.capture) :is(#grid article,#note,#balance,#lab>h2,#lab>p,#lab>details,main>details,#basis,.designs article,.chart){background:#ecebdcd9}}
+  :is(#lab,#energyStudy)>details{margin:12px 0}
+ @supports not (backdrop-filter:blur(5px)){body:not(.capture) :is(#grid article,#note,#balance, :is(#lab,#energyStudy)>h2, :is(#lab,#energyStudy)>p, :is(#lab,#energyStudy)>details,main>details,#basis,.designs article,.chart){background:#ecebdcd9}}
 }
 .designs label.rotation{display:grid;grid-template-columns:auto minmax(60px,1fr) 3.3em;gap:12px;font-size:14px}
 .rotation input{width:100%;margin:0}.rotation output{text-align:right;font-variant-numeric:tabular-nums}
@@ -75,10 +75,21 @@ body.capture{background:#fff}
 .dot-0{fill:#005953}.dot-1{fill:#923711;stroke:#fff9e8;stroke-width:1}
 .capture .rotation{display:none!important}
 #chart{touch-action:pan-y;cursor:crosshair}#chartReading{font-variant-numeric:tabular-nums;margin:4px 0}#jumps{display:flex;gap:8px;flex-wrap:wrap}#jumps button,#testLoad{margin-top:8px;background:#fffdf2ad}.diagnosis{line-height:1.4}.onset{fill:none;stroke-width:1.5;stroke-dasharray:3 5}@media print{#jumps,#testLoad{display:none}}
+#domainBar{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}#domainBar button[aria-pressed=true]{background:#183e36;color:white}
+.scenario-controls{display:grid;gap:6px}.scenario-controls #testLoad{margin:0;justify-self:start}
+#domainStudy{padding:clamp(12px,2vw,24px);border:1px solid #fff9;border-radius:12px;background:#faf9efac;backdrop-filter:blur(5px);margin-bottom:12px}
+#domainStudy label{flex-wrap:wrap;margin:12px 0}#domainStudy .table-wrap{overflow-x:auto}#domainStudy table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#domainStudy th,#domainStudy td{padding:9px 5px;text-align:start;border-bottom:1px solid #3145393b}#domainStudy th{font-weight:600}#trend{display:block;width:100%;height:176px}#trend text{font:12px 'Segoe UI',sans-serif;fill:#193734}
+@media print{#domainBar,#domainStudy label{display:none}#domainStudy{background:white}}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
-<nav aria-label="Simulation controls"><label>Scenario <select id="scenario"></select></label><label>Event progression <input id="phase" type="range" min="0" max="60" value="60"></label><output id="clock"></output><button id="play">Replay</button></nav>
-<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="60"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
+<nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="60" value="60"></label><output id="clock"></output><button id="play">Replay</button></nav>
+<p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="60"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
+<h2 id="studyTitle"></h2><p id="finding"></p>
+<label>Compare with <select id="compare"></select></label>
+<div class="table-wrap"><table><thead><tr><th scope="col">Metric</th><th scope="col" id="currentName"></th><th scope="col" id="refName"></th></tr></thead><tbody id="studyRows"></tbody></table></div>
+<label>Plot metric <select id="metric"></select></label>
+<div class="chart-key"><span>Selected scenario</span><span>Comparison</span></div><svg id="trend" role="img"></svg>
+<details><summary>Model assumptions</summary><p id="studyMethod"></p></details></section><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
 <script>
 // Shared design assumptions. Replace with the signed CIRA handoff before submission.
 const design = {population:182000, homes:80000, gpcd:150, cityPeak:455, peakPue:1.34, solarCapacity:300, waterSupply:18, itLoad:40, gridImportLimit:140};
@@ -236,20 +247,8 @@ plot.onkeydown=e=>{
  const keys={ArrowLeft:minute-1,ArrowRight:minute+1,ArrowDown:minute-1,ArrowUp:minute+1,Home:0,End:60,PageUp:minute+5,PageDown:minute-5};
  if(Object.hasOwn(keys,e.key)){e.preventDefault();seek(keys[e.key])}
 };
-function render(){
- const minute=Number(slider.value),id=selector.value;
- const {end,at,compute,load,battery}=sample(id,minute);
- drawDesert(id,minute/5);
- byId('grid').hidden=lab;byId('lab').hidden=!lab;
- byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
- document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
- document.title='Belmont | '+document.querySelector('h1').textContent;
- if(lab){
-  byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
-  const series=Array.from({length:61},(_,m)=>sample(id,m));
-  drawChart(designs.map(d=>dispatch(d,series,minute)),minute);
- }
- const bands=[
+function domainReadings({at,compute,load,battery}){
+ return [
  ['Energy',[row('Total load',load,'MW',1),row('Municipal load',at('city'),'MW',1),row('Solar output',at('solar'),'MW',1),row('Battery discharge',battery,'MW',1),row('Grid imports',load-at('solar')-battery,'MW',1)],'Total load adds municipal and compute loads. Imports are capped at '+design.gridImportLimit+' MW. Battery discharge is the power required to balance the model. Installed battery capacity remains to be sized.'],
  ['Water',[row('Demand rate',averageDemand*at('water'),'MGD',1),row('Average daily demand',averageDemand,'MGD',1),row('Supply placeholder',design.waterSupply,'MGD',1),row('Distribution loss',at('loss'),'%',1)],'MGD means million gallons per day. Demand is a flow rate. The 18 MGD supply placeholder is 9.3 MGD below average demand. CIRA supply sizing is pending.'],
  ['Mobility',[row('Freight throughput',at('freight'),'trucks/h'),row('Shuttle headway',at('headway'),'min',1),row('C-V2X latency',at('delay'),'ms')],'Freight uses a proposed I-11 logistics corridor. Headway is the interval between neighborhood shuttles. Latency models vehicle-to-infrastructure message delivery.'],
@@ -257,15 +256,90 @@ function render(){
  ['Bioclimatic buildings',[row('Outdoor temperature',at('temp'),'°F',1),row('Indoor temperature',at('indoor'),'°F',1),row('Building cooling load',at('cooling'),'MW',1)],'Indoor temperature represents a modeled occupied building. District building cooling electricity is already included in municipal load.'],
  ['Circular waste / Air quality',[row('Ambient PM₁₀',at('pm'),'µg/m³'),row('Waste diversion',at('diversion'),'%'),row('Collection on schedule',at('collection'),'%')],'PM₁₀ is the modeled ambient concentration of airborne particles up to 10 µm. Waste diversion is the share diverted from disposal. Collection measures the share of scheduled stops on time.']
  ];
+}
+const domainIds=['energy','water','mobility','compute','buildings','waste'];
+const domainNames=['Energy','Water','Mobility','Data / Compute','Bioclimatic buildings','Circular waste / Air quality'];
+let domain=domainIds.includes(saved.get('domain'))?saved.get('domain'):'energy';
+const compare=byId('compare'),metric=byId('metric');
+for(const [key,scenario] of Object.entries(scenarios))compare.add(new Option(scenario.name,key));
+compare.value=Object.hasOwn(scenarios,saved.get('compare'))?saved.get('compare'):'summer';
+const choices={};
+if(/^\d$/.test(saved.get('metric')))choices[domain]=Number(saved.get('metric'));
+for(const [i,key] of domainIds.entries()){
+ const button=document.createElement('button');button.value=key;button.textContent=domainNames[i];
+ button.onclick=()=>{domain=key;update()};byId('domainBar').append(button);
+}
+compare.onchange=update;
+metric.onchange=()=>{choices[domain]=metric.selectedIndex;update()};
+function finding(key,{at,compute},baseline){
+ switch(key){
+ case 'water':return 'Modeled demand is '+(averageDemand*at('water')).toFixed(1)+' MGD against a provisional supply of '+design.waterSupply+' MGD. The estimated gap is '+Math.max(0,averageDemand*at('water')-design.waterSupply).toFixed(1)+' MGD.';
+ case 'mobility':return 'Freight moves at '+at('freight').toFixed(0)+' trucks per hour. Shuttles run every '+at('headway').toFixed(1)+' minutes, compared with '+baseline.at('headway').toFixed(1)+' in the reference scenario.';
+ case 'compute':return 'The '+design.itLoad+' MW IT load requires '+(compute-design.itLoad).toFixed(1)+' MW of additional facility power at the selected time.';
+ case 'buildings':return 'The model holds the occupied building at '+at('indoor').toFixed(1)+' °F while outdoor air is '+at('temp').toFixed(1)+' °F. District cooling draws '+at('cooling').toFixed(1)+' MW.';
+ case 'waste':return (100-at('collection')).toFixed(1)+'% of scheduled collection stops are late at this minute. Modeled airborne PM₁₀ is '+at('pm').toFixed(0)+' µg/m³.';
+ }
+}
+function renderStudy(id,minute,bands){
+ const index=domainIds.indexOf(domain),[title,rows,method]=bands[index];
+ const ref=compare.value,baseline=sample(ref,minute),refRows=domainReadings(baseline)[index][1];
+ byId('studyTitle').textContent=title+' at '+time(minute)+' MST';
+ byId('finding').textContent=finding(domain,sample(id,minute),baseline);
+ byId('studyMethod').textContent=method;
+ byId('currentName').textContent=scenarios[id].name;
+ byId('refName').textContent=scenarios[ref].name+' (reference)';
+ byId('studyRows').innerHTML=rows.map(([label,value,unit],i)=>'<tr><th scope="row">'+label+'</th><td>'+value+' '+unit+'</td><td>'+refRows[i][1]+' '+unit+'</td></tr>').join('');
+ if(metric.dataset.domain!==domain){
+  metric.replaceChildren(...rows.map(([label],i)=>new Option(label,i)));
+  metric.selectedIndex=choices[domain]<rows.length?choices[domain]:0;metric.dataset.domain=domain;
+ }
+ const j=metric.selectedIndex,[label,,unit]=rows[j];
+ // The scenario inputs and domain readings interpolate linearly over this hour.
+ const ends=[id,ref].map(key=>[0,60].map(m=>Number(domainReadings(sample(key,m))[index][1][j][1])));
+ const svg=byId('trend'),w=Math.max(240,svg.clientWidth),left=55,right=w-22,top=27,bottom=147;
+ const low=Math.min(...ends.flat()),high=Math.max(...ends.flat()),pad=(high-low)*.14||Math.max(.1,Math.abs(high)*.05);
+ const y=v=>bottom-(v-low+pad)*(bottom-top)/(high-low+2*pad),x=left+(right-left)*minute/60;
+ svg.setAttribute('viewBox','0 0 '+w+' 176');svg.setAttribute('aria-label',label+' in '+unit+' from 14:00 to 15:00 MST. At '+time(minute)+', selected '+rows[j][1]+', comparison '+refRows[j][1]+'.');
+ svg.replaceChildren();
+ function draw(tag,attrs,content){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const [key,value] of Object.entries(attrs))el.setAttribute(key,value);
+  if(content!==undefined)el.textContent=content;svg.append(el);
+ }
+ draw('text',{x:left,y:15},unit);
+ for(const value of new Set([low,high])){
+  draw('line',{x1:left,x2:right,y1:y(value),y2:y(value),stroke:'#304c3938'});
+  draw('text',{x:left-7,y:y(value)+4,'text-anchor':'end'},value);
+ }
+ draw('line',{x1:x,x2:x,y1:top,y2:bottom,stroke:'#42554c','stroke-dasharray':'2 4'});
+ ends.forEach(([start,end],i)=>{
+  draw('line',{x1:left,x2:right,y1:y(start),y2:y(end),class:'trace trace-'+i});
+  draw('circle',{cx:x,cy:y(start+(end-start)*minute/60),r:i?3:5,class:'dot dot-'+i});
+ });
+ draw('text',{x:left,y:171},'14:00');draw('text',{x:right,y:171,'text-anchor':'end'},'15:00 MST');
+}
+function render(){
+ const minute=Number(slider.value),id=selector.value;
+ const frame=sample(id,minute),{end,at,load,battery}=frame;
+ drawDesert(id,minute/5);
+ byId('grid').hidden=lab;byId('lab').hidden=!lab;
+ byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
+ document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
+ document.title='Belmont | '+document.querySelector('h1').textContent;
+ byId('testLoad').hidden=lab;
+ byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=domain==='energy';
+ for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
+ if(lab && domain==='energy'){
+  byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
+  const series=Array.from({length:61},(_,m)=>sample(id,m));
+  drawChart(designs.map(d=>dispatch(d,series,minute)),minute);
+ }
+ const bands=domainReadings(frame);
+ if(lab && domain!=='energy')renderStudy(id,minute,bands);
  const grid=byId('grid');
  if(!grid.children.length) for(const [name,rows,info] of bands){
    const article=document.createElement('article');
    article.innerHTML='<h2>'+name+'</h2><dl>'+rows.map(([label])=>'<div><dt>'+label+'</dt><dd></dd></div>').join('')+'</dl><details><summary>Metric notes</summary><p>'+info+'</p></details>';
-   if(name==='Energy'){
-    const test=document.createElement('button');test.id='testLoad';test.textContent='Test this load in Scenario Lab';
-    test.onclick=()=>{lab=true;update();byId('labTab').focus()};
-    article.append(test);
-   }
    grid.append(article);
  }
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
@@ -276,9 +350,11 @@ function render(){
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
  if(lab)hash+='&view=lab';
+ if(lab && domain!=='energy')hash+='&domain='+domain+'&compare='+compare.value+'&metric='+metric.value;
  for(const d of designs)d.controls.forEach((el,j)=>{if(lab||saved.has(d.name+j)||el.dataset.changed)hash+='&'+d.name+j+'='+el.value});
  if(location.hash!==hash) location.replace(hash);
 }
+byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{lab=false;update()};
 byId('labTab').onclick=()=>{lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
