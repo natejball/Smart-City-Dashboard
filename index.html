@@ -91,14 +91,18 @@ body.capture{background:#fff}
 @media print{#referenceControl,#reduction{display:none}#overview,#waterExperiment{background:white;break-inside:avoid}}
 .sizing p,.supply p{margin:8px 0}.sizeScroll{overflow-x:auto}#sizeGrid{border-collapse:separate;border-spacing:4px;width:100%;max-width:760px;font-variant-numeric:tabular-nums}#sizeGrid caption{text-align:left;font-weight:600;margin:5px 0}#sizeGrid th{font-size:13px}#sizeGrid button{width:100%;min-height:34px;padding:4px;background:#fff8efb8;border-color:#927e69}#sizeGrid button.covered{background:#d3eee1}#sizeGrid button[aria-pressed=true]{background:#184a40;color:white;outline:2px solid #184a40;outline-offset:1px}#sizeGrid button:focus-visible{outline:3px solid #00459d}#supplyKey{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0}#supplyKey span{display:inline-flex;align-items:center;gap:5px;font-size:14px}#supplyKey i{width:16px;height:9px;border-radius:2px}#supplyKey .loadLine{height:2px;background:#19342f}#supplyRead{font-variant-numeric:tabular-nums}
 @media(max-width:460px){#sizeGrid{border-spacing:2px}#sizeGrid button{font-size:13px;padding:3px 1px}.sizing{padding:10px}}
+#purchases{margin:12px 0}#purchases h3{margin:0 0 10px}#purchases label{flex-wrap:wrap}#purchases p{max-width:82ch}.purchaseCost{padding:8px 0 2px;border-top:1px solid #38544755;font-variant-numeric:tabular-nums}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
 <p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
-<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Battery sizing experiment</h2><div class="chart sizing"><p id="sizingNote"></p>
-<div class="sizeScroll"><table id="sizeGrid"><caption>Unserved energy over three hours (MWh)</caption><thead></thead><tbody></tbody></table></div><p id="sizeTarget"></p></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><h2>Energy supply and demand</h2><div class="chart supply">
+<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><section class="chart" id="purchases"><h3>Supplemental grid purchases</h3>
+<label>Extra import capacity <select id="extraImport"><option value="0">Off · existing grid only</option><option value="25">25 MW</option><option value="50">50 MW</option><option value="100">100 MW</option><option value="full">Cover all remaining demand</option></select></label>
+<p>Both designs use solar, up to 140 MW of base imports, then battery discharge. Extra imports cover any remaining shortfall up to the selected limit. This experiment assumes the additional transmission capacity is available.</p>
+<details><summary>Price basis · $31.36/MWh</summary><p>Purchases use the 2025 average on-peak day-ahead wholesale price at the Palo Verde hub. The estimate covers supplemental energy only. Delivery, losses, capacity charges and scarcity premiums are excluded. Actual hourly prices and available import capacity can differ. <a href="https://www.ferc.gov/sites/default/files/2026-03/26_State-of-the-Market_0324_1430.pdf" target="_blank" rel="noopener">FERC 2025 State of the Markets, Figure 30</a></p></details></section><div class="designs" id="designs"></div><h2>Battery sizing experiment</h2><div class="chart sizing"><p id="sizingNote"></p>
+<div class="sizeScroll"><table id="sizeGrid"><caption>Battery sizing before supplemental purchases · unserved MWh</caption><thead></thead><tbody></tbody></table></div><p id="sizeTarget"></p></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><h2>Energy supply and demand</h2><div class="chart supply">
 <label>Battery design <select id="supplyDesign"><option value="A">Design A</option><option value="B" selected>Design B</option></select></label>
 <div id="supplyKey"></div><svg id="supplyChart" role="img" aria-label="Power balance by source"></svg><p id="supplyRead"></p></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
 <h2 id="studyTitle"></h2><p id="finding"></p>
@@ -189,33 +193,46 @@ const time=m=>(14+Math.floor(m/60))+':'+String(m%60).padStart(2,'0');
 const epsilon=0.00001;
 function diagnosis(required,current,power){
  if(required<=epsilon)return 'Solar and grid imports cover demand. The battery is idle.';
- if(current.gap<=epsilon)return 'The battery supplies the full '+required.toFixed(1)+' MW required from storage.';
+ if(current.imported>epsilon)return 'Battery output is '+current.delivered.toFixed(1)+' MW. Extra grid imports supply '+current.imported.toFixed(1)+' MW, leaving '+current.gap.toFixed(1)+' MW unmet.';
+ if(current.gap<=epsilon)return 'The battery supplies the full '+required.toFixed(1)+' MW to cover with storage'+(extraImport.value==='0'?'.':' and supplemental imports.');
  const unmet=current.gap.toFixed(1)+' MW unmet.';
  if(!power)return 'The power limit is set to 0 MW, leaving '+unmet;
  if(current.available<=epsilon)return 'The battery starts this minute empty, leaving '+unmet;
  if(current.delivered+epsilon<power)return 'The battery exhausts its available energy this minute, leaving '+unmet;
  return 'Output reaches the '+power+' MW limit with '+current.remaining.toFixed(1)+' MWh remaining, leaving '+unmet;
 }
-function simulateBattery(power,capacity,charge,series,cursor){
+const extraImport=byId('extraImport');
+if([...extraImport.options].some(option=>option.value===saved.get('extra')))extraImport.value=saved.get('extra');
+extraImport.onchange=update;
+const importPrice=31.36;
+const dollars=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+function simulateBattery(power,capacity,charge,series,cursor,extraLimit=0){
  let remaining=capacity*charge/100,unserved=0,first=null,peak=0;
- const gaps=[];let current;
+ const gaps=[],purchases=[];let bought=0,current;
  series.forEach((s,m)=>{
   const available=remaining;
   const delivered=Math.min(s.battery,power,m?remaining*60:(remaining>0?power:0));
-  const gap=Math.max(0,s.battery-delivered);
+  const residual=Math.max(0,s.battery-delivered);
+  const imported=Math.min(extraLimit,residual),gap=residual-imported;
+  purchases.push(imported);
+  if(m)bought+=imported/60;
   if(m){remaining=Math.max(0,remaining-delivered/60);unserved+=gap/60}
   if(gap>epsilon && first===null)first=m;
   peak=Math.max(peak,gap);gaps.push(gap);
-  if(m===cursor)current={gap,remaining,delivered,available};
+  if(m===cursor)current={gap,remaining,delivered,available,imported,bought};
  });
- return {gaps,first,peak,unserved,current};
+ return {gaps,first,peak,unserved,current,purchases,bought};
 }
 function dispatch(designCase,series,cursor){
  const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
  designCase.summary.textContent=power+' MW · '+capacity+' MWh · '+charge+'% starting charge';
- const result=simulateBattery(power,capacity,charge,series,cursor);
+ const extraLimit=extraImport.value==='full'?Infinity:Number(extraImport.value);
+ const result=simulateBattery(power,capacity,charge,series,cursor,extraLimit);
  const {gaps,first,peak,unserved,current}=result;
  designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
+ if(extraLimit){
+  designCase.output.insertAdjacentHTML('beforeend','<div class="purchaseCost"><b>Supplemental energy cost</b><br>Through '+time(cursor)+' · '+current.bought.toFixed(2)+' MWh · '+dollars.format(current.bought*importPrice)+'<br>Three-hour total · '+result.bought.toFixed(2)+' MWh · '+dollars.format(result.bought*importPrice)+'</div>');
+ }
  const fraction=capacity?current.remaining/capacity:0;
  designCase.view.charge=fraction;
  drawPack(designCase.pack,designCase.view.angle,fraction);
@@ -259,7 +276,7 @@ function renderSizing(id,series){
   const roundUp=n=>(Math.ceil(n*10-1e-8)/10).toFixed(1);
   let target='Solar and grid imports cover the full run without storage.';
   if(requiredPower>epsilon){
-   target='Full coverage needs at least '+roundUp(requiredPower)+' MW of discharge power and '+roundUp(requiredEnergy)+' MWh of stored energy at the start.';
+   target='Before supplemental purchases, full coverage needs at least '+roundUp(requiredPower)+' MW of discharge power and '+roundUp(requiredEnergy)+' MWh of stored energy at the start.';
    if(charge){
     const capacity=requiredEnergy*100/charge;
     target+=' At '+charge+'% starting charge, that requires '+roundUp(capacity)+' MWh of usable capacity.';
@@ -270,19 +287,19 @@ function renderSizing(id,series){
  }
  for(const {cell,power,capacity} of sizeCells)cell.setAttribute('aria-pressed',String(power===selectedPower&&capacity===selectedCapacity));
 }
-const sources=[['Solar','#c08b2f'],['Grid imports','#708aac'],['Battery','#268674'],['Unmet demand','#bb5b4b']];
+const sources=[['Solar','#c08b2f'],['Base imports','#708aac'],['Battery','#268674'],['Extra imports','#835c99'],['Unmet demand','#bb5b4b']];
 byId('supplyKey').innerHTML=sources.map(([name,color])=>'<span><i style="background:'+color+'"></i>'+name+'</span>').join('')+'<span><i class="loadLine"></i>Total demand</span>';
 const supplySelect=byId('supplyDesign');
 supplySelect.value=saved.get('supply')==='A'?'A':'B';
 supplySelect.onchange=update;
 function drawSupply(series,results,minute){
  const svg=byId('supplyChart'),width=Math.max(240,svg.clientWidth),left=42,right=width-15,top=24,bottom=176;
- const gaps=results[supplySelect.selectedIndex].gaps;
+ const {gaps,purchases}=results[supplySelect.selectedIndex];
  const maximum=Math.ceil(Math.max(...series.map(s=>s.load))/100)*100;
  const x=m=>left+(right-left)*m/duration,y=v=>bottom-(bottom-top)*v/maximum;
  const frames=series.slice(0,minute+1).map((s,m)=>{
   const solar=Math.min(s.at('solar'),s.load),grid=s.load-solar-s.battery;
-  return [0,solar,solar+grid,s.load-gaps[m],s.load];
+  return [0,solar,solar+grid,s.load-gaps[m]-purchases[m],s.load-gaps[m],s.load];
  });
  svg.setAttribute('viewBox','0 0 '+width+' 205');svg.replaceChildren();
  function add(tag,attrs,content){
@@ -301,9 +318,9 @@ function drawSupply(series,results,minute){
   const lower=frames.map((v,m)=>x(m)+','+y(v[i])).reverse();
   add('polygon',{points:upper.concat(lower).join(' '),fill:color});
  });
- add('polyline',{points:frames.map((v,m)=>x(m)+','+y(v[4])).join(' '),fill:'none',stroke:'#19342f','stroke-width':2});
- const current=frames[minute];add('circle',{cx:x(minute),cy:y(current[4]),r:3.5,fill:'#19342f'});
- const reading=time(minute)+' MST · Design '+supplySelect.value+' · '+sources.map(([name],i)=>name+' '+(current[i+1]-current[i]).toFixed(1)+' MW').join(' · ')+' · Total '+current[4].toFixed(1)+' MW';
+ add('polyline',{points:frames.map((v,m)=>x(m)+','+y(v[5])).join(' '),fill:'none',stroke:'#19342f','stroke-width':2});
+ const current=frames[minute];add('circle',{cx:x(minute),cy:y(current[5]),r:3.5,fill:'#19342f'});
+ const reading=time(minute)+' MST · Design '+supplySelect.value+' · '+sources.map(([name],i)=>name+' '+(current[i+1]-current[i]).toFixed(1)+' MW').join(' · ')+' · Total '+current[5].toFixed(1)+' MW';
  byId('supplyRead').textContent=reading;svg.setAttribute('aria-label',reading);
 }
 function drawChart(results,cursor){
@@ -516,6 +533,7 @@ function render(){
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
  if(lab)hash+='&view=lab';
+ if(extraImport.value!=='0')hash+='&extra='+extraImport.value;
  if(lab && supplySelect.value==='A')hash+='&supply=A';
  if(lab)hash+='&domain='+domain+'&compare='+compare.value;
  if(lab && !byId('domainStudy').hidden)hash+='&metric='+metric.value;
