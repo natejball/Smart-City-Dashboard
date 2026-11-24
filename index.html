@@ -99,6 +99,9 @@ body.capture{background:#fff}
 #waterTotals{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#waterTotals th,#waterTotals td{padding:7px;text-align:right;border-bottom:1px solid #344d412b}#waterTotals th:first-child{text-align:left;font-weight:500}#waterTotals tbody tr:last-child{font-weight:700}#waterForm h3{margin-top:18px!important}
 #recoveryMinute{width:clamp(110px,24vw,360px)}#recoveryClock{font-variant-numeric:tabular-nums}#waterEnergy{max-width:100%}
 #energyStudy{display:grid;gap:14px;margin:14px 0;min-width:0}
+#mobilityForm label,#mobilityDemand label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}
+#mobilityForm input,#mobilityDemand input{font:inherit;min-width:0;width:40%;max-width:220px;padding:6px;border:1px solid #72857a;border-radius:5px;background:#fffdf4}
+#mobilityCards>.chart{align-self:start}#mobilityCards dl div,#mobilityPreview div{gap:10px}#mobilityCards dt,#mobilityPreview dt{white-space:normal}#mobilityForm h3{margin-top:18px!important}#mobilityDemand{max-width:620px}
 #energyStudy>details.chart{width:100%;margin:0;padding:14px 16px}
 #energyStudy>details>summary,#designs details>summary{font-size:1rem;font-weight:650;padding:4px 0;cursor:pointer}
 #energyStudy>details[open]>summary,#designs details[open]>summary{margin-bottom:10px}
@@ -162,7 +165,30 @@ body.capture{background:#fff}
 <section class="chart water-summary"><h2>Design performance</h2><p id="waterPreviewTime"></p><dl id="waterPreview"></dl><details><summary>Storage, conservation and electricity</summary><dl id="waterPreviewDetail"></dl></details>
 <div class="water-actions"><button id="waterLoadA">Test as Design A</button><button id="waterLoadB">Test as Design B</button></div></section></div>
 <section class="chart"><h2>Saved water designs</h2><p>Saved in this browser on this device.</p><div class="water-actions" id="savedWater"></div></section></section>
+<section id="mobilityBuilder" class="water-stack" hidden aria-label="Mobility designer">
+<div class="builder-layout"><form id="mobilityForm" class="chart"><h2>Route and gate design</h2>
+<label>Design name<input name="name" maxlength="64" required></label>
+<h3>Neighborhood shuttle loop</h3><div id="fleetFields"></div>
+<h3>Freight receiving gates</h3><div id="gateFields"></div>
+<details><summary>Vehicle costs and electricity</summary><div id="busCostFields"></div>
+<p>Vehicle purchase covers the fleet only. Gate staffing, construction, depot and charger costs require separate estimates. The operating estimate applies a regional average per revenue mile. Electricity is reported separately in kWh and is already represented in the operating benchmark.</p></details>
+<div class="water-actions"><button id="saveMobility">Save design</button><button type="button" id="newMobility">New design</button></div><output id="mobilityStatus" role="status"></output></form>
+<section class="chart water-summary"><h2>Design performance</h2><p id="mobilityPreviewTime"></p><dl id="mobilityPreview"></dl>
+<div class="water-actions"><button id="mobilityLoadA">Test as Design A</button><button id="mobilityLoadB">Test as Design B</button></div></section></div>
+<section class="chart"><h2>Saved mobility designs</h2><p>Saved in this browser on this device.</p><div id="savedMobility" class="water-actions"></div></section></section>
 <section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div>
+<section id="mobilityLab" class="water-stack" hidden aria-label="Mobility comparison">
+<section class="chart"><h2>Mobility design comparison</h2><p id="mobilityPeriod"></p><button id="labMobilityBuilder">Design a mobility system</button>
+<details><summary>Shared arrivals and service target</summary><form id="mobilityDemand"><p>Apply the same hourly arrivals and maximum shuttle interval to both designs for the full three-hour test.</p><div id="arrivalFields"></div><button>Apply to both designs</button> <output id="arrivalStatus" role="status"></output></form></details></section>
+<div class="builder-layout" id="mobilityCards"></div>
+<details id="mobilityQueues" class="chart water-fold"><summary>When do queues build and clear?</summary>
+<label>Show <select id="queueMetric"><option value="riders">Riders waiting</option><option value="trucks">Trucks waiting</option></select></label>
+<div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="queuePlot" role="img"></svg><p id="queueReading"></p></details>
+<details class="chart water-fold"><summary>Scheduling, costs and model assumptions</summary>
+<p>One loop serves one modeled boarding point. At normal summer conditions a four-shuttle fleet on a 24-minute cycle reproduces the six-minute baseline. The scenario-to-summer headway ratio scales the cycle, including recovery. Dividing cycle time by active vehicles gives the service interval. <a href="https://onlinepubs.trb.org/Onlinepubs/tcrp/tcrp_rpt_30-a.pdf">TCRP Report 30, transit scheduling manual</a></p>
+<p>Queues start empty at 14:00. Each minute adds arrivals and serves as many as capacity allows, carrying the balance forward. Shuttle seats and departures are averaged over time. Counts estimate excess demand and omit the ordinary wait between departures. Freight service is capped by both receiving gates and the scenario corridor throughput. Message latency remains a separate scenario reading.</p>
+<p>Default vehicle costs use Phoenix’s 2022 estimate of $1.1 million per 40-foot electric bus and Valley Metro’s FY2024 fixed-route average of $10.31 per revenue mile. Electricity uses 2.10 kWh/mile measured on Foothill Transit’s 40-foot fast-charge fleet. These are editable benchmarks. Route geometry, demand, freight gates and weather effects are Belmont planning assumptions pending local validation. <a href="https://phoenix.legistar.com/View.ashx?GUID=D02A5F21-78F8-4487-A308-B8E18F64192E&amp;ID=902111&amp;M=M">Phoenix bus estimate</a> · <a href="https://www.valleymetro.org/about/reports">Valley Metro performance reports</a> · <a href="https://www.nrel.gov/docs/fy21osti/80022.pdf">NREL bus evaluation</a></p></details>
+<details id="mobilityBaseline" class="chart water-fold"><summary>Compare baseline scenarios</summary></details></section>
 <section id="waterLab" class="water-stack" hidden aria-label="Water system comparison">
 <section class="chart"><h2>Water system comparison</h2><p id="waterLabTime"></p><button id="labWaterBuilder">Design a water system</button>
 <details><summary>Try an emergency reserve</summary><p>Copy Design A into B with a full 1-million-gallon standby tank and a 10 MGD emergency outlet. Compare the additional cost and gallons of shortfall avoided.</p><button id="tryWaterReserve">Test emergency reserve in B</button></details>
@@ -253,7 +279,7 @@ function sample(id,minute){
  }
  return frame;
 }
-let building=['battery','water-design'].includes(saved.get('view'))?saved.get('view'):null;
+let building=['battery','water-design','mobility-design'].includes(saved.get('view'))?saved.get('view'):null;
 const limits=[100000,1000000,100];
 function setRating(select,index,value){
  if(!Array.from(select.options).some(option=>Number(option.value)===value))select.add(new Option(value+[' MW',' MWh','%'][index],value));
@@ -1023,23 +1049,203 @@ function renderWaterLab(id,minute){
  byId('waterReserveReading').textContent=reserve;
  drawWaterPlot(byId('waterReserve'),runs.map(r=>r.frames.map(f=>f.stored)),minute,false,'million gal',reserve);
 }
+const mobilityForm=byId('mobilityForm'), mobilityDemand=byId('mobilityDemand');
+const mobilityFields=[
+ ['fleet','Active electric shuttles',4,0,500,'fleetFields',1],
+ ['cycle','Normal round trip incl. recovery (min)',24,1,1440,'fleetFields'],
+ ['seats','Boarding places per shuttle',30,1,200,'fleetFields',1],
+ ['miles','Revenue miles per round trip',5,0.1,500,'fleetFields'],
+ ['gates','Staffed receiving gates',1,0,100,'gateFields',1],
+ ['gateRate','Service per gate (trucks/h)',150,0,1000,'gateFields'],
+ ['price','Purchase per shuttle ($)',1100000,0,10000000,'busCostFields'],
+ ['mileCost','Operating cost ($/revenue mile)',10.31,0,1000,'busCostFields'],
+ ['kwh','Electricity (kWh/revenue mile)',2.1,0,100,'busCostFields']
+];
+const arrivalFields=[
+ ['riders','Rider arrivals per hour',220,0,100000,'arrivalFields'],
+ ['trucks','Truck arrivals per hour',140,0,10000,'arrivalFields'],
+ ['target','Maximum shuttle interval (min)',8,0.1,240,'arrivalFields']
+];
+function mobilityInputs(fields){
+ const defaults={};
+ for(const [key,title,value,min,max,group,step] of fields){
+  const label=document.createElement('label'),input=document.createElement('input');
+  Object.assign(input,{name:key,type:'number',min,max,step:step||'any',value,required:true});
+  label.append(title,input);byId(group).append(label);defaults[key]=value;
+ }
+ return defaults;
+}
+const fleetDefault={name:'Neighborhood loop',...mobilityInputs(mobilityFields)};
+const arrivalsDefault=mobilityInputs(arrivalFields);
+function mobilityValues(raw,fields){
+ if(!raw||typeof raw!=='object')return null;
+ const values={};
+ for(const [key,,,min,max,,step] of fields){
+  const v=raw[key];if(!Number.isFinite(v)||v<min||v>max||(step===1&&!Number.isInteger(v)))return null;
+  values[key]=v;
+ }
+ if(fields===mobilityFields){
+  if(typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>64)return null;
+  values.name=raw.name.trim();
+ }
+ return values;
+}
+function mobilityParam(key,fields){
+ try{return mobilityValues(JSON.parse(saved.get(key)),fields)}catch{return null}
+}
+function mobilityRead(form,fields){
+ const raw={};
+ for(const [key] of fields)raw[key]=form.elements.namedItem(key).valueAsNumber;
+ if(fields===mobilityFields)raw.name=form.elements.namedItem('name').value;
+ return mobilityValues(raw,fields);
+}
+function fillMobilityForm(form,values){
+ for(const [key,value] of Object.entries(values))form.elements.namedItem(key).value=value;
+}
+let arrivals=mobilityParam('arrivals',arrivalFields)||arrivalsDefault;
+fillMobilityForm(mobilityDemand,arrivals);
+mobilityDemand.onsubmit=e=>{
+ e.preventDefault();const next=mobilityRead(mobilityDemand,arrivalFields);if(!next)return;
+ arrivals=next;update();byId('arrivalStatus').textContent='Applied to both designs.';
+};
+mobilityDemand.oninput=()=>{byId('arrivalStatus').textContent='Changes pending.'};
+// Integrate service rates at each minute end. Minute zero is an instantaneous snapshot.
+function simulateMobility(d,id,demand){
+ let riders=0,trucks=0,boarded=0,processed=0,miles=0,missed=0,peakRiders=0,peakTrucks=0;
+ const frames=[];
+ for(let m=0;m<=duration;m++){
+  const {at}=baseSample(id,m),cycle=d.cycle*at('headway')/scenarios.summer.headway;
+  const interval=d.fleet?cycle/d.fleet:Infinity;
+  const loops=d.fleet/cycle,boardingRate=60*loops*d.seats;
+  const gateCapacity=d.gates*d.gateRate,corridor=at('freight'),truckRate=Math.min(gateCapacity,corridor);
+  if(m){
+   riders+=demand.riders/60;trucks+=demand.trucks/60;
+   const served=Math.min(riders,boardingRate/60),received=Math.min(trucks,truckRate/60);
+   riders-=served;trucks-=received;boarded+=served;processed+=received;miles+=loops*d.miles;
+   if(interval>demand.target+epsilon)missed++;
+   peakRiders=Math.max(peakRiders,riders);peakTrucks=Math.max(peakTrucks,trucks);
+  }
+  frames.push({riders,trucks,interval,boardingRate,truckRate,needed:Math.ceil(cycle/demand.target-1e-12),corridor,gateCapacity});
+ }
+ return {frames,boarded,processed,miles,missed,peakRiders,peakTrucks,cost:miles*d.mileCost,energy:miles*d.kwh,capital:d.fleet*d.price};
+}
+const mobilityStorage='belmont.mobility.v1.';
+let editingMobility=null;
+function fillMobility(d,key=null){
+ fillMobilityForm(mobilityForm,d);editingMobility=key;
+ byId('saveMobility').textContent=key?'Save changes':'Save design';byId('mobilityStatus').textContent='';
+}
+function listMobility(){
+ const list=byId('savedMobility');list.replaceChildren();
+ try{
+  for(const key of Object.keys(localStorage).filter(k=>k.startsWith(mobilityStorage)).sort()){
+   let d;try{d=mobilityValues(JSON.parse(localStorage.getItem(key)),mobilityFields)}catch{continue}
+   if(!d)continue;
+   const button=document.createElement('button');button.textContent=d.name;
+   button.onclick=()=>{fillMobility(d,key);update();mobilityForm.elements.namedItem('name').focus()};list.append(button);
+  }
+  if(!list.childElementCount)list.textContent='No saved mobility designs yet.';
+ }catch{list.textContent='Saved designs are unavailable in this browser.'}
+}
+function openMobilityDesigner(d){
+ fillMobility(d);listMobility();building='mobility-design';lab=false;update();mobilityForm.elements.namedItem('name').focus();
+}
+function openMobilityLab(){
+ building=null;lab=true;domain='mobility';update();byId('domainBar').querySelector('[value="mobility"]').focus();
+}
+const countEstimate=v=>v.toLocaleString('en-US',{maximumFractionDigits:1});
+const shuttleInterval=v=>Number.isFinite(v)?countEstimate(v)+' min':'No service';
+function mobilityResults(run,m){
+ const f=run.frames[m],end=run.frames[duration];
+ return [['Shuttle interval at '+time(m),shuttleInterval(f.interval)],['Vehicles needed for '+fmt(arrivals.target)+' min at '+time(m),fmt(f.needed)],
+ ['Riders waiting at 17:00',countEstimate(end.riders)],['Trucks waiting at 17:00',countEstimate(end.trucks)],
+ ['Three-hour shuttle operating cost',dollars.format(run.cost)],['Fleet purchase estimate',money(run.capital)]];
+}
+function renderMobilityBuilder(){
+ const d=mobilityRead(mobilityForm,mobilityFields),m=Number(slider.value),id=selector.value;
+ for(const key of ['saveMobility','mobilityLoadA','mobilityLoadB'])byId(key).disabled=!d;
+ byId('mobilityPreviewTime').textContent=scenarios[id].name+' · '+fmt(arrivals.riders)+' riders/h · '+fmt(arrivals.trucks)+' trucks/h · '+fmt(arrivals.target)+' min target';
+ if(d)renderMetricList(byId('mobilityPreview'),mobilityResults(simulateMobility(d,id,arrivals),m));
+ else byId('mobilityPreview').textContent='Enter a name and valid specifications to test this design.';
+}
+mobilityForm.oninput=()=>{byId('mobilityStatus').textContent='';renderMobilityBuilder()};
+mobilityForm.onsubmit=e=>{
+ e.preventDefault();const d=mobilityRead(mobilityForm,mobilityFields);if(!d)return;
+ try{
+  const key=editingMobility||mobilityStorage+crypto.randomUUID();
+  localStorage.setItem(key,JSON.stringify(d));fillMobility(d,key);listMobility();byId('mobilityStatus').textContent='Saved '+d.name;
+ }catch{byId('mobilityStatus').textContent='Could not save in this browser. You can still test this design.'}
+};
+byId('newMobility').onclick=()=>openMobilityDesigner(fleetDefault);
+byId('labMobilityBuilder').onclick=()=>openMobilityDesigner(fleetDefault);
+fillMobility(fleetDefault);if(building==='mobility-design')listMobility();
+window.addEventListener('storage',e=>{if(building==='mobility-design'&&(!e.key||e.key.startsWith(mobilityStorage)))listMobility()});
+const mobilitySlots=['A','B'].map(letter=>{
+ const custom=mobilityParam('mobility'+letter,mobilityFields);
+ const design=custom||(letter==='A'?fleetDefault:{...fleetDefault,name:'Expanded loop and gates',fleet:6,gates:2});
+ const card=document.createElement('article');card.className='chart water-summary';
+ card.innerHTML='<h3></h3><p class="water-outcome"></p><dl></dl><button>Edit design</button><details><summary>Capacity and event totals</summary><dl></dl></details>';
+ const slot={letter,design,custom:!!custom,card};
+ card.querySelector('button').setAttribute('aria-label','Edit Mobility Design '+letter);
+ card.querySelector('button').onclick=()=>openMobilityDesigner(slot.design);byId('mobilityCards').append(card);
+ byId('mobilityLoad'+letter).onclick=()=>{
+  const d=mobilityRead(mobilityForm,mobilityFields);if(d){slot.design=d;slot.custom=true;openMobilityLab()}
+ };
+ return slot;
+});
+function mobilityRun(slot,id){
+ if(slot.cachedDesign!==slot.design||slot.cachedDemand!==arrivals||slot.cachedScenario!==id){
+  slot.run=simulateMobility(slot.design,id,arrivals);slot.cachedDesign=slot.design;slot.cachedDemand=arrivals;slot.cachedScenario=id;
+ }
+ return slot.run;
+}
+function renderMobilityLab(id,m){
+ byId('mobilityPeriod').textContent=scenarios[id].name+' · 14:00–17:00 MST · '+fmt(arrivals.riders)+' riders/h · '+fmt(arrivals.trucks)+' trucks/h · '+fmt(arrivals.target)+' min shuttle target';
+ for(const slot of mobilitySlots){
+  const d=slot.design,run=mobilityRun(slot,id),f=run.frames[m],card=slot.card;
+  card.querySelector('h3').textContent='Design '+slot.letter+' · '+d.name;
+  const outcome=card.querySelector('p');
+  outcome.textContent=run.missed?run.missed+' of 180 minutes exceed the shuttle target':'Shuttle target met for all 180 minutes';
+  outcome.classList.toggle('short',!!run.missed);
+  renderMetricList(card.querySelector('dl'),mobilityResults(run,m));
+  renderMetricList(card.querySelector('details dl'),[['Active shuttles / gates',d.fleet+' / '+d.gates],
+   ['Boarding capacity at '+time(m),fmt(f.boardingRate)+' riders/h'],['Freight capacity at '+time(m),fmt(f.truckRate)+' trucks/h'],
+   ['Freight constraint at '+time(m),f.corridor===f.gateCapacity?'Gates and corridor':f.corridor<f.gateCapacity?'Corridor':'Receiving gates'],
+   ['Peak riders / trucks waiting',countEstimate(run.peakRiders)+' / '+countEstimate(run.peakTrucks)],
+   ['Riders boarded / trucks processed',countEstimate(run.boarded)+' / '+countEstimate(run.processed)],
+   ['Shuttle revenue miles',fmt(run.miles)],['Vehicle electricity',fmt(run.energy)+' kWh']]);
+ }
+ if(byId('mobilityQueues').open){
+  const key=byId('queueMetric').value,series=mobilitySlots.map(slot=>mobilityRun(slot,id).frames.map(f=>f[key]));
+  const reading=time(m)+' MST · '+series.map((v,i)=>'Design '+mobilitySlots[i].letter+' '+countEstimate(v[m])+' '+key+' waiting').join(' · ');
+  drawWaterPlot(byId('queuePlot'),series,m,false,key,reading);byId('queueReading').textContent=reading;
+ }
+}
+byId('queueMetric').onchange=update;
+for(const key of ['mobilityQueues','mobilityBaseline']){
+ byId(key).ontoggle=()=>{if(lab&&domain==='mobility'&&byId(key).open)render()};
+}
 function render(){
  const minute=Number(slider.value),id=selector.value;
  const frame=sample(id,minute),{end,at,load,battery}=frame;
  drawDesert(id,intensity(id,minute));
  byId('grid').hidden=lab||!!building;byId('lab').hidden=!lab;byId('builder').hidden=building!=='battery';byId('waterBuilder').hidden=building!=='water-design';
  document.querySelector('nav').hidden=building;byId('note').hidden=building;
+ byId('mobilityBuilder').hidden=building!=='mobility-design';
+ if(building==='mobility-design')renderMobilityBuilder();
  if(building==='battery')renderBuilder();
  if(building==='water-design')renderWaterBuilder();
 
  byId('opsTab').setAttribute('aria-pressed',String(!lab&&!building));byId('labTab').setAttribute('aria-pressed',String(lab));
- document.querySelector('h1').textContent=building==='water-design'?'Water System Design':building==='battery'?'Battery Design':lab?'Scenario Lab':'City Operations';
+ document.querySelector('h1').textContent=building==='mobility-design'?'Mobility System Design':building==='water-design'?'Water System Design':building==='battery'?'Battery Design':lab?'Scenario Lab':'City Operations';
  document.title='Belmont | '+document.querySelector('h1').textContent;
  byId('testLoad').hidden=lab;
  byId('energyStudy').hidden=domain!=='energy';byId('domainStudy').hidden=['energy','overview'].includes(domain);
  const baseline=byId('waterBaseline'),reference=byId('referenceControl'),study=byId('domainStudy');
- if(domain==='water'&&study.parentElement!==baseline)baseline.append(reference,study);
- if(domain!=='water'&&study.parentElement===baseline){baseline.after(reference);byId('energyStudy').after(study)}
+ const referenceFold=domain==='water'?baseline:domain==='mobility'?byId('mobilityBaseline'):null;
+ if(referenceFold&&study.parentElement!==referenceFold)referenceFold.append(reference,study);
+ if(!referenceFold&&study.parentElement!==byId('lab')){baseline.after(reference);byId('energyStudy').after(study)}
+ byId('mobilityLab').hidden=domain!=='mobility';
  baseline.hidden=domain!=='water';byId('overview').hidden=domain!=='overview';reference.hidden=domain==='energy';
  byId('waterExperiment').hidden=domain!=='water';byId('waterLab').hidden=domain!=='water';
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
@@ -1062,6 +1268,7 @@ function render(){
  if(lab && domain==='overview')renderOverview(id,minute,bands);
  if(lab && !byId('domainStudy').hidden)renderStudy(id,minute,bands);
  if(lab && domain==='water'){renderConservation(averageDemand*at('water'));renderWaterLab(id,minute)}
+ if(lab && domain==='mobility')renderMobilityLab(id,minute);
  const grid=byId('grid');
  if(!grid.children.length) for(const [name,rows,info] of bands){
    const article=document.createElement('article');
@@ -1075,10 +1282,21 @@ function render(){
     water.innerHTML='<h3>Modeled system · Design A</h3><p id="waterOpsName"></p><dl id="waterOps"></dl><div class="water-actions"><button id="testWater">Test this demand</button><button id="opsWaterBuilder">Design a water system</button></div>';
     article.append(water);water.querySelector('#testWater').onclick=openWaterLab;water.querySelector('#opsWaterBuilder').onclick=openWaterDesigner;
    }
+   if(name==='Mobility'){
+    article.querySelectorAll('dt')[1].textContent='Baseline shuttle headway';
+    const section=document.createElement('section');section.className='water-summary';
+    section.innerHTML='<h3>Modeled system · Design A</h3><p></p><dl id="mobilityOps"></dl><div class="water-actions"><button>Test this service</button><button>Design a mobility system</button></div>';
+    section.querySelector('button').onclick=openMobilityLab;section.querySelectorAll('button')[1].onclick=()=>openMobilityDesigner(mobilitySlots[0].design);
+    article.append(section);
+   }
    grid.append(article);
  }
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
  if(!lab&&!building){
+  const mobility=mobilitySlots[0],mf=mobilityRun(mobility,id).frames[minute],ops=byId('mobilityOps');
+  ops.previousElementSibling.textContent=mobility.design.name;
+  renderMetricList(ops,[['Shuttle interval / target',shuttleInterval(mf.interval)+' / '+fmt(arrivals.target)+' min'],
+   ['Riders waiting',countEstimate(mf.riders)],['Trucks waiting',countEstimate(mf.trucks)]]);
   const slot=waterSlots[0],d=slot.design,f=waterRun(slot,id).frames[minute];
   byId('waterOpsName').textContent=d.name;
   renderMetricList(byId('waterOps'),[['Available potable supply',flow(d.supply)],['Demand after conservation',flow(f.demand)],['Eligible irrigation',flow(f.irrigation)],['Reclaimed delivered',flow(f.reclaimed)],['Working tank',fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Emergency water stored',gallons(f.standby)],['Unmet demand',flow(f.unmet)]]);
@@ -1099,6 +1317,8 @@ function render(){
  for(const d of designs)d.controls.forEach((el,j)=>{if(lab||saved.has(d.name+j)||el.dataset.changed)hash+='&'+d.name+j+'='+el.value});
  for(const d of designs)if(d.custom)hash+='&'+d.name+'design='+encodeURIComponent(JSON.stringify(d.custom));
  for(const slot of waterSlots)if(slot.custom)hash+='&water'+slot.slot+'='+encodeURIComponent(JSON.stringify(slot.design));
+ for(const slot of mobilitySlots)if(slot.custom)hash+='&mobility'+slot.letter+'='+encodeURIComponent(JSON.stringify(slot.design));
+ if(Object.keys(arrivalsDefault).some(k=>arrivals[k]!==arrivalsDefault[k]))hash+='&arrivals='+encodeURIComponent(JSON.stringify(arrivals));
  if(waterFlowSelect.value==='B')hash+='&waterFlow=B';
  if(waterEnergy.value!=='off')hash+='&waterEnergy='+waterEnergy.value;
  if(Number(recoveryMinute.value)!==dayLength)hash+='&recovery='+recoveryMinute.value;
@@ -1111,7 +1331,7 @@ for(const id of ['energyShortfall','energySizing','energySupply']){
 }
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{building=false;lab=false;update()};
-byId('labTab').onclick=()=>{if(!lab)domain=building==='water-design'?'water':building==='battery'?'energy':'overview';building=false;lab=true;update()};
+byId('labTab').onclick=()=>{if(!lab)domain=building==='mobility-design'?'mobility':building==='water-design'?'water':building==='battery'?'energy':'overview';building=false;lab=true;update()};
 byId('share').onclick=async()=>{stop();try{await navigator.clipboard.writeText(location.href);byId('copied').textContent=' Link copied'}catch{byId('copied').textContent=' Copy the address from your browser'}};
 // Scale the drawing surface to its layout width on high-density screens.
 function surface(canvas){
