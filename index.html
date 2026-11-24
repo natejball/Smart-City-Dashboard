@@ -102,8 +102,8 @@ body.capture{background:#fff}
 <p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="builder" hidden aria-label="Battery design editor">
 <div class="builder-layout"><form id="batteryForm" class="chart"><h2>Design specifications</h2>
 <label>Design name<input id="bdName" maxlength="64" required value="Four-hour battery"></label>
-<label>Discharge power (MW)<input id="bdPower" type="number" required min="0.01" max="100000" step="any" value="60"></label>
-<label>Usable capacity (MWh)<input id="bdCapacity" type="number" required min="0.01" max="1000000" step="any" value="240"></label>
+<label>Discharge power (MW)<input id="bdPower" type="number" required min="0" max="100000" step="any" value="60"></label>
+<label>Usable capacity (MWh)<input id="bdCapacity" type="number" required min="0" max="1000000" step="any" value="240"></label>
 <label>Starting charge (%)<input id="bdCharge" type="number" required min="0" max="100" step="any" value="100"></label>
 <details><summary>Capital cost assumptions</summary>
 <label>Power cost ($/kW)<input id="bdPowerCost" type="number" required min="0" max="100000" step="any" value="345"></label>
@@ -240,7 +240,11 @@ const designs=['A','B'].map((name,i)=>{
  const spec=document.createElement('p');spec.className='customSpec';card.querySelector('h2').after(spec);
  let custom=null;
  try{const candidate=JSON.parse(saved.get(name+'design'));if(validBattery(candidate)&&[candidate.power,candidate.capacity,candidate.charge].every((v,j)=>v===Number(controls[j].value)))custom=candidate}catch{}
- return {name,controls,summary,output,pack,info,meter,view,spec,custom};
+ const slot={name,controls,summary,output,pack,info,meter,view,spec,custom};
+ const edit=document.createElement('button');
+ edit.type='button';edit.textContent='Edit design';edit.setAttribute('aria-label','Edit Design '+name);
+ edit.onclick=()=>editBatterySlot(slot);spec.after(edit);
+ return slot;
 });
 const time=m=>(14+Math.floor(m/60))+':'+String(m%60).padStart(2,'0');
 const epsilon=0.00001;
@@ -283,7 +287,7 @@ function dispatch(designCase,series,cursor){
  const custom=designCase.custom;
  if(custom&&(power!==custom.power||capacity!==custom.capacity||charge!==custom.charge))designCase.custom=null;
  designCase.spec.hidden=!designCase.custom;
- if(designCase.custom)designCase.spec.textContent=custom.name+' · '+money(capital(custom))+' capital estimate · '+fmt(capacity/power)+' h at rated power';
+ if(designCase.custom)designCase.spec.textContent=custom.name+' · '+money(capital(custom))+' capital estimate · '+batteryRuntime(capacity,power);
  const result=simulateBattery(power,capacity,charge,series,cursor,extraLimit);
  const {gaps,first,peak,unserved,current}=result;
  designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
@@ -559,10 +563,11 @@ const inputs=[...batteryForm.querySelectorAll('input')];
 const money=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
 const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:3});
 const capital=d=>1000*(d.power*d.powerCost+d.capacity*d.energyCost);
+const batteryRuntime=(energy,power)=>power?fmt(energy/power)+' h at rated power':'No discharge at 0 MW';
 let editing=null;
 function validBattery(d){
  return d&&typeof d.name==='string'&&d.name.trim().length>0&&d.name.length<=64&&
- ['power','capacity','charge','powerCost','energyCost'].every((k,i)=>Number.isFinite(d[k])&&d[k]>=(i<2?.01:0)&&d[k]<=[100000,1000000,100,100000,100000][i]);
+ ['power','capacity','charge','powerCost','energyCost'].every((k,i)=>Number.isFinite(d[k])&&d[k]>=0&&d[k]<=[100000,1000000,100,100000,100000][i]);
 }
 function readBattery(){
  return Object.fromEntries(fields.map((k,i)=>[k,i?inputs[i].valueAsNumber:inputs[i].value.trim()]));
@@ -577,12 +582,25 @@ function renderBuilder(){
  const end=simulateBattery(d.power,d.capacity,d.charge,series,duration).current;
  const stored=d.capacity*d.charge/100;
  for(const [label,value] of [
- ['Estimated capital cost',money(capital(d))],['Full-charge duration at rated power',fmt(d.capacity/d.power)+' h'],
- ['Starting stored energy',fmt(stored)+' MWh'],['Runtime from starting charge',fmt(stored/d.power)+' h'],
+ ['Estimated capital cost',money(capital(d))],['Full-charge duration',batteryRuntime(d.capacity,d.power)],
+ ['Starting stored energy',fmt(stored)+' MWh'],['Runtime from starting charge',batteryRuntime(stored,d.power)],
  ['Discharge throughput over 3 h',fmt(stored-end.remaining)+' MWh']]){
   const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;row.append(dt,dd);metrics.append(row);
  }
  const caption=document.createElement('p');caption.textContent='Throughput is the energy delivered in the '+scenarios[id].name+' scenario, 14:00–17:00 MST.';metrics.append(caption);
+}
+function fillBattery(d,key){
+ editing=key;
+ fields.forEach((field,i)=>inputs[i].value=d[field]);
+ byId('saveDesign').textContent=key?'Save changes':'Save design';
+}
+function editBatterySlot(slot){
+ const [power,capacity,charge]=slot.controls.map(control=>Number(control.value));
+ const d=slot.custom||{name:'Design '+slot.name,power,capacity,charge,
+  powerCost:Number(byId('bdPowerCost').defaultValue),energyCost:Number(byId('bdEnergyCost').defaultValue)};
+ fillBattery(d,null);
+ byId('builderStatus').textContent='Editing Design '+slot.name+'. Choose Test as Design '+slot.name+' to apply your changes.';
+ openBatteryDesigner();
 }
 function listBatteries(){
  const list=byId('savedBatteries');list.replaceChildren();
@@ -594,7 +612,7 @@ function listBatteries(){
   items.sort((a,b)=>a[1].name.localeCompare(b[1].name));
   for(const [key,d] of items){
    const item=document.createElement('button');item.textContent=d.name+' · '+fmt(d.power)+' MW / '+fmt(d.capacity)+' MWh';
-   item.onclick=()=>{editing=key;fields.forEach((k,i)=>inputs[i].value=d[k]);byId('saveDesign').textContent='Save changes';byId('builderStatus').textContent='Editing '+d.name;renderBuilder();byId('bdName').focus()};list.append(item);
+   item.onclick=()=>{fillBattery(d,key);byId('builderStatus').textContent='Editing '+d.name;renderBuilder();byId('bdName').focus()};list.append(item);
   }
   if(!items.length)list.textContent='No saved designs yet.';
  }catch{list.textContent='Browser storage is unavailable. You can still test a design in the lab.'}
