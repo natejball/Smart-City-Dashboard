@@ -98,6 +98,17 @@ body.capture{background:#fff}
 #waterForm label{display:flex;justify-content:space-between;gap:12px;margin:12px 0}#waterForm input{font:inherit;min-width:0;width:42%;max-width:220px;padding:6px;border:1px solid #72857a;border-radius:5px;background:#fffdf4}.water-summary dl div{align-items:baseline}.water-summary dd{white-space:normal;text-align:right;font-size:16px}.water-summary progress{width:100%;accent-color:#007d83}.water-actions,.water-key{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:10px 0}.water-key span{display:inline-flex;align-items:center;gap:6px}.water-key i{width:16px;height:9px;border-radius:2px}.water-stack .chart>svg{height:186px}.water-stack details{margin-top:12px}.water-summary h3,.water-summary dd{overflow-wrap:anywhere}
 #waterTotals{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}#waterTotals th,#waterTotals td{padding:7px;text-align:right;border-bottom:1px solid #344d412b}#waterTotals th:first-child{text-align:left;font-weight:500}#waterTotals tbody tr:last-child{font-weight:700}#waterForm h3{margin-top:18px!important}
 #recoveryMinute{width:clamp(110px,24vw,360px)}#recoveryClock{font-variant-numeric:tabular-nums}#waterEnergy{max-width:100%}
+#energyStudy{display:grid;gap:14px;margin:14px 0;min-width:0}
+#energyStudy>details.chart{width:100%;margin:0;padding:14px 16px}
+#energyStudy>details>summary,#designs details>summary{font-size:1rem;font-weight:650;padding:4px 0;cursor:pointer}
+#energyStudy>details[open]>summary,#designs details[open]>summary{margin-bottom:10px}
+#energyStudy .chart>h2,#designs h3{margin:0;overflow-wrap:anywhere}
+#designs{align-items:start}#designs article{min-width:0}
+#designs .settings-summary{display:block;margin:6px 0;color:#355146;font-size:.9rem}
+#designs .energy-outcome{font:600 clamp(1.25rem,2vw,1.65rem) Georgia,serif;margin:12px 0;color:#184c43}
+#designs .energy-outcome.short{color:#77371a}#designs dl{margin-bottom:12px}#designs dd{white-space:normal;text-align:right;font-size:1rem}
+#designs details{margin-top:12px}#energyPeriod{margin:8px 0 12px}
+@media print{.capture #energyStudy>details[open],.capture #designs details[open]{display:block}}
 .water-fold>summary,#waterForm details>summary{font-size:1rem;font-weight:650;padding:4px 0}.water-stack>details{margin:0}.water-stack .water-outcome{font:600 clamp(1.25rem,2vw,1.65rem) Georgia,serif;margin:12px 0;color:#184c43}.water-stack .water-outcome.short{color:#77371a}#waterCards>.chart{align-self:start}#waterForm select{max-width:55%}.water-fold>summary{cursor:pointer}#waterBaseline{margin:12px 0}</style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
@@ -173,16 +184,18 @@ body.capture{background:#fff}
 <details id="waterBaseline" class="chart water-fold" hidden><summary>Compare baseline scenarios</summary></details><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
-<section id="energyStudy"><h2>Battery design comparison</h2><button type="button" id="labOpenBuilder">Design a battery</button><p id="balance"></p>
-<section class="chart"><h3>Water system electricity</h3><label>Add facility load <select id="waterEnergy"><option value="off">Off · city baseline</option><option value="A">Water Design A</option><option value="B">Water Design B</option></select></label><p id="waterEnergyRead"></p>
-<details><summary>Load accounting</summary><p>The selected water facility is treated as additional to the city forecast. Both battery designs see the same pumping and treatment demand. The experiment assumes electricity is available to run the water system. Energy shortfalls do not curtail water service.</p></details></section>
-<section class="chart" id="purchases"><h3>Supplemental grid purchases</h3>
+<section id="energyStudy" class="energy-stack"><section class="chart"><h2>Battery design comparison</h2><p id="energyPeriod"></p><button type="button" id="labOpenBuilder">Design a battery</button></section>
+<div class="designs" id="designs"></div>
+<details class="chart" id="purchases"><summary>How do extra grid purchases affect cost and coverage?</summary>
 <label>Extra import capacity <select id="extraImport"><option value="0">Off · existing grid only</option><option value="25">25 MW</option><option value="50">50 MW</option><option value="100">100 MW</option><option value="full">Cover all remaining demand</option></select></label>
 <p>Both designs use solar, up to 140 MW of base imports, then battery discharge. Extra imports cover any remaining shortfall up to the selected limit. This experiment assumes the additional transmission capacity is available.</p>
-<details><summary>Price basis · $31.36/MWh</summary><p>Purchases use the 2025 average on-peak day-ahead wholesale price at the Palo Verde hub. The estimate covers supplemental energy only. Delivery, losses, capacity charges and scarcity premiums are excluded. Actual hourly prices and available import capacity can differ. <a href="https://www.ferc.gov/sites/default/files/2026-03/26_State-of-the-Market_0324_1430.pdf" target="_blank" rel="noopener">FERC 2025 State of the Markets, Figure 30</a></p></details></section><div class="designs" id="designs"></div><h2>Battery sizing experiment</h2><div class="chart sizing"><p id="sizingNote"></p>
-<div class="sizeScroll"><table id="sizeGrid"><caption>Battery sizing before supplemental purchases · unserved MWh</caption><thead></thead><tbody></tbody></table></div><p id="sizeTarget"></p></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><h2>Energy supply and demand</h2><div class="chart supply">
+<details><summary>Price basis · $31.36/MWh</summary><p>Purchases use the 2025 average on-peak day-ahead wholesale price at the Palo Verde hub. The estimate covers supplemental energy only. Delivery, losses, capacity charges and scarcity premiums are excluded. Actual hourly prices and available import capacity can differ. <a href="https://www.ferc.gov/sites/default/files/2026-03/26_State-of-the-Market_0324_1430.pdf" target="_blank" rel="noopener">FERC 2025 State of the Markets, Figure 30</a></p></details></details>
+<details class="chart" id="energyWaterPanel"><summary>How much load does the water system add?</summary><label>Add facility load <select id="waterEnergy"><option value="off">Off · city baseline</option><option value="A">Water Design A</option><option value="B">Water Design B</option></select></label><p id="waterEnergyRead"></p>
+<details><summary>Load accounting</summary><p>The selected water facility is treated as additional to the city forecast. Both battery designs see the same pumping and treatment demand. The experiment assumes electricity is available to run the water system. Energy shortfalls do not curtail water service.</p></details></details>
+<details class="chart sizing" id="energySizing"><summary>What battery size would cover demand?</summary><p id="sizingNote"></p>
+<div class="sizeScroll"><table id="sizeGrid"><caption>Battery sizing before supplemental purchases · unserved MWh</caption><thead></thead><tbody></tbody></table></div><p id="sizeTarget"></p></details><details class="chart" id="energyShortfall"><summary>When does demand go unmet?</summary><h3>Unmet demand · 14:00–17:00 MST</h3><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></details><details class="chart supply" id="energySupply"><summary>Where does the electricity come from?</summary><p id="balance"></p>
 <label>Battery design <select id="supplyDesign"><option value="A">Design A</option><option value="B" selected>Design B</option></select></label>
-<div id="supplyKey"></div><svg id="supplyChart" role="img" aria-label="Power balance by source"></svg><p id="supplyRead"></p></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
+<div id="supplyKey"></div><svg id="supplyChart" role="img" aria-label="Power balance by source"></svg><p id="supplyRead"></p></details><details class="chart"><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
 <h2 id="studyTitle"></h2><p id="finding"></p>
 <section id="waterExperiment" hidden><h3>Baseline conservation experiment</h3><p>Explore the provisional 18 MGD supply before storage. Designs A and B use their own conservation targets.</p>
 <label for="reduction">Hypothetical demand reduction <output id="reductionValue" for="reduction"></output></label>
@@ -250,7 +263,9 @@ let lab=saved.get('view')==='lab';
 const options=[['Power limit (MW)',[0,50,100,150,200]],['Usable energy (MWh)',[0,25,50,100,200]],['Starting charge (%)',[0,25,50,75,100]]];
 const designs=['A','B'].map((name,i)=>{
  const card=document.createElement('article');
- card.innerHTML='<h2>Design '+name+'</h2>';
+ card.innerHTML='<h3>Design '+name+'</h3><p class="energy-outcome"></p><dl></dl>';
+ const heading=card.querySelector('h3'),outcome=card.querySelector('.energy-outcome'),metrics=card.querySelector('dl');
+ const details=document.createElement('details');details.innerHTML='<summary>Battery settings and operating details</summary>';
  const controls=options.map(([label,values],j)=>{
   const field=document.createElement('label'), select=document.createElement('select');
   field.textContent=label;
@@ -258,7 +273,7 @@ const designs=['A','B'].map((name,i)=>{
   const key=name+j, stored=saved.get(key);
   const parsed=Number(stored);
   setRating(select,j,stored!==null&&stored.trim()!==''&&Number.isFinite(parsed)&&parsed>=0&&parsed<=limits[j]?parsed:[[100,100,100],[150,100,100]][i][j]);
-  select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);card.append(field);return select;
+  select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);details.append(field);return select;
  });
  const pack=document.createElement('canvas');pack.className='pack';pack.setAttribute('aria-label','Battery enclosure showing remaining stored energy');
  const info=document.createElement('p');info.className='pack-info';
@@ -271,7 +286,7 @@ const designs=['A','B'].map((name,i)=>{
  const degrees=document.createElement('output');
  rotate.append('Enclosure rotation',angle,degrees);
  const summary=document.createElement('p');summary.className='settings-summary';
- card.append(summary,pack,info,meter,rotate);
+ heading.after(summary);details.append(pack,info,meter,rotate);
  const view={angle:0,charge:0};
  const orient=()=>{
   degrees.value=angle.value+'°';
@@ -280,14 +295,15 @@ const designs=['A','B'].map((name,i)=>{
  };
  orient();
  angle.oninput=()=>{orient();drawPack(pack,view.angle,view.charge)};
- const output=document.createElement('div');card.append(output);byId('designs').append(card);
- const spec=document.createElement('p');spec.className='customSpec';card.querySelector('h2').after(spec);
+ const output=document.createElement('div');details.append(output);byId('designs').append(card);
+ const spec=document.createElement('p');spec.className='customSpec';details.querySelector('summary').after(spec);
  let custom=null;
  try{const candidate=JSON.parse(saved.get(name+'design'));if(validBattery(candidate)&&[candidate.power,candidate.capacity,candidate.charge].every((v,j)=>v===Number(controls[j].value)))custom=candidate}catch{}
- const slot={name,controls,summary,output,pack,info,meter,view,spec,custom};
+ const slot={name,controls,summary,output,pack,info,meter,view,spec,custom,heading,outcome,metrics,details};
  const edit=document.createElement('button');
  edit.type='button';edit.textContent='Edit design';edit.setAttribute('aria-label','Edit Design '+name);
- edit.onclick=()=>editBatterySlot(slot);spec.after(edit);
+ edit.onclick=()=>editBatterySlot(slot);card.append(edit,details);
+ details.ontoggle=()=>{if(details.open&&lab&&domain==='energy')render()};
  return slot;
 });
 const time=m=>(14+Math.floor(m/60))+':'+String(m%60).padStart(2,'0');
@@ -333,14 +349,18 @@ function dispatch(designCase,series,cursor){
  designCase.spec.hidden=!designCase.custom;
  if(designCase.custom)designCase.spec.textContent=custom.name+' · '+money(capital(custom))+' capital estimate · '+batteryRuntime(capacity,power);
  const result=simulateBattery(power,capacity,charge,series,cursor,extraLimit);
- const {gaps,first,peak,unserved,current}=result;
- designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
+ const {first,peak,unserved,current}=result;
+ designCase.heading.textContent='Design '+designCase.name+(designCase.custom?' · '+custom.name:'');
+ designCase.outcome.textContent=first===null?'All demand met':(unserved<0.05?'<0.1':unserved.toFixed(1))+' MWh unmet';
+ designCase.outcome.classList.toggle('short',first!==null);
+ renderMetricList(designCase.metrics,[['Extra grid energy',fmt(result.bought)+' MWh'],['Extra grid cost',dollars.format(result.bought*importPrice)]]);
+ designCase.output.innerHTML='<p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
  if(extraLimit){
-  designCase.output.insertAdjacentHTML('beforeend','<div class="purchaseCost"><b>Supplemental energy cost</b><br>Through '+time(cursor)+' · '+current.bought.toFixed(2)+' MWh · '+dollars.format(current.bought*importPrice)+'<br>Three-hour total · '+result.bought.toFixed(2)+' MWh · '+dollars.format(result.bought*importPrice)+'</div>');
+  designCase.output.insertAdjacentHTML('beforeend','<p class="purchaseCost">Extra grid purchases through '+time(cursor)+' · '+current.bought.toFixed(2)+' MWh · '+dollars.format(current.bought*importPrice)+'</p>');
  }
  const fraction=capacity?current.remaining/capacity:0;
  designCase.view.charge=fraction;
- drawPack(designCase.pack,designCase.view.angle,fraction);
+ if(designCase.details.open)drawPack(designCase.pack,designCase.view.angle,fraction);
  designCase.info.textContent=current.remaining.toFixed(1)+' / '+capacity+' MWh stored · '+current.delivered.toFixed(1)+' / '+power+' MW output';
  designCase.meter.max=power||1;designCase.meter.value=current.delivered;
  return result;
@@ -783,7 +803,7 @@ function explainWater(f,d){
  if(f.withdrawal>1e-9)return 'Direct supply and tank withdrawals cover demand.';
  return 'Direct supply covers demand.';
 }
-function waterMetrics(list,rows){
+function renderMetricList(list,rows){
  list.replaceChildren();
  for(const [label,value] of rows){
   const line=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');
@@ -832,9 +852,9 @@ function renderWaterBuilder(){
  if(!d){preview.textContent='Enter a design name and valid specifications.';byId('waterPreviewDetail').replaceChildren();return}
  const run=simulateWater(d,id),f=run.frames[minute],gap=f.demand-f.reclaimed-f.direct;
  const runtime=gap<=1e-9?'Supply covers demand':gap>d.outlet?'Outlet limits coverage':fmt(f.stored*24/gap)+' h';
- waterMetrics(preview,[['Three-hour unmet demand',gallons(run.unserved)],['Emergency water used',gallons(run.reserveUsed)],
+ renderMetricList(preview,[['Three-hour unmet demand',gallons(run.unserved)],['Emergency water used',gallons(run.reserveUsed)],
   ['Standby tank construction',money(reserveBuild(d))],['Initial standby fill',dollars.format(reserveFirstFill(d))],['Three-hour water purchases',dollars.format(run.operatingCost)]]);
- waterMetrics(byId('waterPreviewDetail'),[['Starting working storage',gallons(d.capacity*d.fill/100)],['Working storage at '+time(minute),gallons(f.stored)],
+ renderMetricList(byId('waterPreviewDetail'),[['Starting working storage',gallons(d.capacity*d.fill/100)],['Working storage at '+time(minute),gallons(f.stored)],
   ['Working tank runtime at current demand',runtime],
   ['Ending reserve',gallons(run.ending)],['Three-hour demand avoided',gallons(run.conserved)],['Three-hour reclaimed irrigation',gallons(run.reuseVolume)],
   ['Pumping and treatment at '+time(minute),fmt(f.waterMW)+' MW'],['Three-hour electricity',fmt(run.electricity)+' MWh'],
@@ -877,7 +897,7 @@ for(const slot of waterSlots){
  card.querySelector('progress').setAttribute('aria-label','Design '+slot.slot+' tank fill');
  card.querySelector('.water-jump').onclick=()=>{const first=waterRun(slot,selector.value).first;if(first!==null)seek(first)};
  card.querySelector('.water-edit').onclick=()=>{fillWater(slot.design,null);openWaterDesigner()};
- card.querySelector('.water-energy').onclick=()=>{waterEnergy.value=slot.slot;domain='energy';update();waterEnergy.focus()};
+ card.querySelector('.water-energy').onclick=()=>{waterEnergy.value=slot.slot;domain='energy';byId('energyWaterPanel').open=true;update();waterEnergy.focus()};
  slot.card=card;byId('waterCards').append(card);
 }
 function drawWaterPlot(svg,series,minute,stacked,unit,reading){
@@ -951,7 +971,7 @@ function renderRecovery(id){
   const drawdown=r.frames.findIndex(f=>f.stored+1e-9<start);
   const restored=drawdown<0?-1:r.frames.findIndex((f,m)=>m>drawdown&&f.stored+1e-9>=start);
   const recoveryTime=drawdown<0?(start>0?'Reserve held':'No starting reserve'):restored<0?'Beyond this run':waterClock(restored)+' MST';
-  waterMetrics(byId('day'+slot.slot),[['Starting working storage',gallons(start)],['First recovery after drawdown',recoveryTime],['Working storage at 10:00 tomorrow',gallons(peak)],['Morning recovery',outcome],
+  renderMetricList(byId('day'+slot.slot),[['Starting working storage',gallons(start)],['First recovery after drawdown',recoveryTime],['Working storage at 10:00 tomorrow',gallons(peak)],['Morning recovery',outcome],
    ['Lowest working storage in 24 h',gallons(r.minStored)],['Ending working storage',gallons(r.ending)],['Emergency water delivered',gallons(r.reserveUsed)],['Standby water at 10:00 tomorrow',gallons(r.frames[morningPeak].standby)],['Ending standby water',gallons(r.standby)],['24-hour unserved water',gallons(r.unserved)],['24-hour water purchases',dollars.format(r.operatingCost)],['24-hour electricity',fmt(r.electricity)+' MWh']]);
  }
 }
@@ -967,10 +987,10 @@ function renderWaterLab(id,minute){
   outcome.classList.toggle('short',r.first!==null);
   const headline=[['Emergency water used',d.reserveCapacity?gallons(r.reserveUsed):'No standby tank'],['Three-hour water purchases',dollars.format(r.operatingCost)]];
   if(d.reserveCapacity)headline.push(['Standby tank + initial fill',money(reserveBuild(d)+reserveFirstFill(d))]);
-  waterMetrics(card.querySelector('.water-headline'),headline);
+  renderMetricList(card.querySelector('.water-headline'),headline);
   card.querySelector('.water-spec').textContent=flow(d.supply)+' potable supply · '+flow(d.reuseLimit)+' reclaimed capacity · '+flow(d.outlet)+' tank outlet';
   card.querySelector('progress').value=d.capacity?f.stored/d.capacity*100:0;
-  waterMetrics(card.querySelector('.water-detail'),[['Working storage at '+time(minute),fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Current unmet demand',flow(f.unmet)],
+  renderMetricList(card.querySelector('.water-detail'),[['Working storage at '+time(minute),fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Current unmet demand',flow(f.unmet)],
    ['First shortfall',r.first===null?'None':time(r.first)+' MST'],['Ending working storage',gallons(r.ending)],['Ending emergency storage',gallons(r.standby)],
    ['Pumping at '+time(minute),fmt(f.pumpMW)+' MW'],['Treatment at '+time(minute),fmt(f.treatmentMW)+' MW'],['Three-hour electricity',fmt(r.electricity)+' MWh']]);
   card.querySelector('.water-jump').hidden=r.first===null;
@@ -1025,6 +1045,8 @@ function render(){
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
  if(lab && domain==='energy'){
   const selected=waterSlots[waterEnergy.selectedIndex-1];
+  const importSetting=extraImport.value==='0'?'off':extraImport.value==='full'?'full coverage':extraImport.value+' MW limit';
+  byId('energyPeriod').textContent=scenarios[id].name+' · Results for 14:00–17:00 MST · Extra imports '+importSetting+(selected?' · Water Design '+selected.slot+' connected':'');
   if(selected){
    const run=waterRun(selected,id),f=run.frames[minute];
    byId('waterEnergyRead').textContent='Design '+selected.slot+' · '+selected.design.name+' adds '+fmt(f.waterMW)+' MW at '+time(minute)+' MST ('+fmt(f.pumpMW)+' MW pumping and '+fmt(f.treatmentMW)+' MW treatment). Three-hour electricity: '+fmt(run.electricity)+' MWh.';
@@ -1032,7 +1054,9 @@ function render(){
   byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
   const series=Array.from({length:duration+1},(_,m)=>sample(id,m));
   const results=designs.map(d=>dispatch(d,series,minute));
-  drawChart(results,minute);renderSizing(id,series);drawSupply(series,results,minute);
+  if(byId('energyShortfall').open)drawChart(results,minute);
+  if(byId('energySizing').open)renderSizing(id,series);
+  if(byId('energySupply').open)drawSupply(series,results,minute);
  }
  const bands=domainReadings(frame);
  if(lab && domain==='overview')renderOverview(id,minute,bands);
@@ -1057,7 +1081,7 @@ function render(){
  if(!lab&&!building){
   const slot=waterSlots[0],d=slot.design,f=waterRun(slot,id).frames[minute];
   byId('waterOpsName').textContent=d.name;
-  waterMetrics(byId('waterOps'),[['Available potable supply',flow(d.supply)],['Demand after conservation',flow(f.demand)],['Eligible irrigation',flow(f.irrigation)],['Reclaimed delivered',flow(f.reclaimed)],['Working tank',fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Emergency water stored',gallons(f.standby)],['Unmet demand',flow(f.unmet)]]);
+  renderMetricList(byId('waterOps'),[['Available potable supply',flow(d.supply)],['Demand after conservation',flow(f.demand)],['Eligible irrigation',flow(f.irrigation)],['Reclaimed delivered',flow(f.reclaimed)],['Working tank',fmt(f.stored)+' / '+fmt(d.capacity)+' million gal'],['Emergency water stored',gallons(f.standby)],['Unmet demand',flow(f.unmet)]]);
  }
  byId('clock').textContent=time(minute)+' MST';
  byId('reportState').textContent=end.name+' · '+byId('clock').textContent;
@@ -1082,6 +1106,9 @@ function render(){
 }
 function openBatteryDesigner(){building='battery';lab=false;listBatteries();update();byId('bdName').focus()}
 byId('labOpenBuilder').onclick=openBatteryDesigner;
+for(const id of ['energyShortfall','energySizing','energySupply']){
+ byId(id).ontoggle=()=>{if(byId(id).open&&lab&&domain==='energy')render()};
+}
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{building=false;lab=false;update()};
 byId('labTab').onclick=()=>{if(!lab)domain=building==='water-design'?'water':building==='battery'?'energy':'overview';building=false;lab=true;update()};
@@ -1196,9 +1223,16 @@ function report(on){
 
  render();
 }
-let wasReport;
-window.addEventListener('beforeprint',()=>{wasReport=document.body.classList.contains('capture');report(true)});
-window.addEventListener('afterprint',()=>report(wasReport));
+let wasReport,printPanels=[];
+window.addEventListener('beforeprint',()=>{
+ wasReport=document.body.classList.contains('capture');
+ if(lab&&domain==='energy'){
+  printPanels=[...document.querySelectorAll('#designs details,#energySizing,#energyShortfall,#energySupply,#purchases,#energyWaterPanel')].filter(panel=>!panel.open);
+  for(const panel of printPanels)panel.open=true;
+ }
+ report(true);
+});
+window.addEventListener('afterprint',()=>{for(const panel of printPanels)panel.open=false;printPanels=[];report(wasReport)});
 
 document.querySelector('nav').onpointermove=e=>{if(!still.matches&&timer){const nav=e.currentTarget;nav.style.setProperty('--shine',100*(e.clientX-nav.getBoundingClientRect().left)/nav.clientWidth+'%')}};
 window.addEventListener('resize',render);
