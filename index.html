@@ -91,11 +91,11 @@ body.capture{background:#fff}
 @media print{#referenceControl,#reduction{display:none}#overview,#waterExperiment{background:white;break-inside:avoid}}
 </style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
 <div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
-<nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="60" value="60"></label><output id="clock"></output><button id="play">Replay</button></nav>
+<nav aria-label="Simulation controls"><div class="scenario-controls"><label>Scenario <select id="scenario"></select></label><button id="testLoad">Test this load in Scenario Lab</button></div><label>Event progression <input id="phase" type="range" min="0" max="180" value="0"></label><output id="clock"></output><button id="play">Replay</button></nav>
 <p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
-<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="60"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
+<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand · 14:00–17:00 MST</h2><div class="chart"><div class="chart-key"><span>Design A</span><span>Design B</span></div><svg id="chart" role="slider" tabindex="0" aria-label="Inspect unmet demand by minute" aria-valuemin="0" aria-valuemax="180"></svg><p id="chartReading"></p><div id="jumps"><button hidden></button><button hidden></button></div></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the three-hour run. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details></section><section id="domainStudy" hidden>
 <h2 id="studyTitle"></h2><p id="finding"></p>
 <section id="waterExperiment" hidden><h3>Water conservation experiment</h3>
 <label for="reduction">Hypothetical demand reduction <output id="reductionValue" for="reduction"></output></label>
@@ -106,7 +106,7 @@ body.capture{background:#fff}
 <div class="table-wrap"><table><thead><tr><th scope="col">Metric</th><th scope="col" id="currentName"></th><th scope="col" id="refName"></th></tr></thead><tbody id="studyRows"></tbody></table></div>
 <label>Plot metric <select id="metric"></select></label>
 <div class="chart-key"><span>Selected scenario</span><span>Comparison</span></div><svg id="trend" role="img"></svg>
-<details><summary>Model assumptions</summary><p id="studyMethod"></p></details></section><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
+<details><summary>Model assumptions</summary><p id="studyMethod"></p></details></section><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Conditions develop through 15:00 MST, then hold through 16:00. In the final hour extreme events return toward normal summer conditions, while seasonal scenarios hold their 15:00 levels. These extensions are illustrative. Battery discharge accumulates throughout the three-hour run. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
 <script>
 // Shared design assumptions. Replace with the signed CIRA handoff before submission.
 const design = {population:182000, homes:80000, gpcd:150, cityPeak:455, peakPue:1.34, solarCapacity:300, waterSupply:18, itLoad:40, gridImportLimit:140};
@@ -125,11 +125,17 @@ const selector=byId('scenario'), slider=byId('phase'), play=byId('play');
 for(const [id,s] of Object.entries(scenarios)) selector.add(new Option(s.name,id));
 const saved=new URLSearchParams(location.hash.slice(1));
 if(Object.hasOwn(scenarios,saved.get('scenario'))) selector.value=saved.get('scenario');
-if(saved.has('step') && /^(?:[0-9]|1[0-2])$/.test(saved.get('step'))) slider.value=Number(saved.get('step'))*5;
-if(/^(?:[0-9]|[1-5][0-9]|60)$/.test(saved.get('minute')))slider.value=saved.get('minute');
+const duration=180;
+if(saved.has('step') && /^\d{1,2}$/.test(saved.get('step')) && Number(saved.get('step'))<=duration/5) slider.value=Number(saved.get('step'))*5;
+if(/^\d{1,3}$/.test(saved.get('minute')) && Number(saved.get('minute'))<=duration)slider.value=saved.get('minute');
 const row=(label,value,unit,digits=0)=>[label,value.toFixed(digits),unit];
+function intensity(id,minute){
+ if(minute<=60)return minute/60;
+ if(minute>120 && (id==='heat'||id==='dust'))return (duration-minute)/60;
+ return 1;
+}
 function sample(id,minute){
- const end=scenarios[id], fraction=minute/60;
+ const end=scenarios[id], fraction=intensity(id,minute);
  // Extreme events develop from normal summer conditions. Seasonal runs stay within their season.
  const seasonalStart = {...end, temp:end.temp-2, solar:end.solar*1.08, city:end.city*0.98, cooling:end.cooling*0.96, water:end.water*0.98};
  const start = ['heat','dust'].includes(id) ? scenarios.summer : seasonalStart;
@@ -174,7 +180,7 @@ const designs=['A','B'].map((name,i)=>{
  const output=document.createElement('div');card.append(output);byId('designs').append(card);
  return {name,controls,summary,output,pack,info,meter,view};
 });
-const time=m=>m===60?'15:00':'14:'+String(m).padStart(2,'0');
+const time=m=>(14+Math.floor(m/60))+':'+String(m%60).padStart(2,'0');
 const epsilon=0.00001;
 function diagnosis(required,current,power){
  if(required<=epsilon)return 'Solar and grid imports cover demand. The battery is idle.';
@@ -199,7 +205,7 @@ function dispatch(designCase,series,cursor){
   peak=Math.max(peak,gap);gaps.push(gap);
   if(m===cursor)current={gap,remaining,delivered,available};
  });
- designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved</p><p>Full-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
+ designCase.output.innerHTML='<p class="result">'+unserved.toFixed(1)+' MWh unserved over three hours</p><p>Three-hour peak shortfall <b>'+peak.toFixed(1)+' MW</b><br>First shortfall <b>'+(first===null?'None':time(first)+' MST')+'</b></p><p class="diagnosis"><b>'+time(cursor)+' MST</b> · '+diagnosis(series[cursor].battery,current,power)+'</p>';
  const fraction=capacity?current.remaining/capacity:0;
  designCase.view.charge=fraction;
  drawPack(designCase.pack,designCase.view.angle,fraction);
@@ -212,7 +218,7 @@ function drawChart(results,cursor){
  const svg=byId('chart'), width=Math.max(240,Math.round(svg.clientWidth)),height=212;
  const left=40,right=width-18,top=32,bottom=height-32;
  const limit=Math.max(20,Math.ceil(Math.max(...lines.flat())/20)*20);
- const x=m=>left+(right-left)*m/60, y=v=>bottom-(bottom-top)*v/limit;
+ const x=m=>left+(right-left)*m/duration, y=v=>bottom-(bottom-top)*v/limit;
  svg.setAttribute('viewBox','0 0 '+width+' '+height);
  svg.replaceChildren();
  function add(tag,attrs,label){
@@ -231,7 +237,7 @@ function drawChart(results,cursor){
   if(first===null)return;
   button.textContent='Design '+designs[i].name+' first shortfall · '+time(first);
   button.onclick=()=>seek(first);
-  add('line',{x1:x(first),x2:x(first),y1:top,y2:bottom,class:'onset',stroke:i?'#923711':'#005953'});
+  if(first<=cursor)add('line',{x1:x(first),x2:x(first),y1:top,y2:bottom,class:'onset',stroke:i?'#923711':'#005953'});
  });
  for(let i=0;i<=4;i++){
   const value=limit*i/4;
@@ -239,29 +245,29 @@ function drawChart(results,cursor){
   add('text',{x:left-9,y:y(value)+4,'text-anchor':'end'},value);
  }
  add('text',{x:left-8,y:16,'text-anchor':'end'},'MW');
- for(const m of (width<420?[0,30,60]:[0,15,30,45,60])){
-  add('text',{x:x(m),y:height-8,'text-anchor':m===0?'start':m===60?'end':'middle'},time(m));
+ for(const m of (width<420?[0,60,120,180]:[0,30,60,90,120,150,180])){
+  add('text',{x:x(m),y:height-8,'text-anchor':m===0?'start':m===duration?'end':'middle'},time(m));
  }
  add('line',{x1:x(cursor),x2:x(cursor),y1:top-4,y2:bottom,class:'cursor'});
- add('text',{x:x(cursor),y:16,'text-anchor':cursor<10?'start':cursor>50?'end':'middle'},time(cursor)+' MST');
+ add('text',{x:x(cursor),y:16,'text-anchor':cursor<duration*.15?'start':cursor>duration*.85?'end':'middle'},time(cursor)+' MST');
  lines.forEach((values,i)=>{
-  add('polyline',{points:values.map((v,m)=>x(m)+','+y(v)).join(' '),class:'trace trace-'+i});
+  add('polyline',{points:values.slice(0,cursor+1).map((v,m)=>x(m)+','+y(v)).join(' '),class:'trace trace-'+i});
   add('circle',{cx:x(cursor),cy:y(values[cursor]),r:i?3:5,class:'dot dot-'+i});
  });
 }
 function seek(minute){
- slider.value=Math.max(0,Math.min(60,minute));update();
+ slider.value=Math.max(0,Math.min(duration,minute));update();
 }
 const plot=byId('chart');
 function scrub(event){
  const local=new DOMPoint(event.clientX,event.clientY).matrixTransform(plot.getScreenCTM().inverse());
- seek(Math.round((local.x-40)*60/(plot.viewBox.baseVal.width-58)));
+ seek(Math.round((local.x-40)*duration/(plot.viewBox.baseVal.width-58)));
 }
 plot.onpointerdown=e=>{if(e.button===0&&e.isPrimary){plot.setPointerCapture(e.pointerId);scrub(e)}};
 plot.onpointermove=e=>{if(plot.hasPointerCapture(e.pointerId))scrub(e)};
 plot.onkeydown=e=>{
  const minute=Number(slider.value);
- const keys={ArrowLeft:minute-1,ArrowRight:minute+1,ArrowDown:minute-1,ArrowUp:minute+1,Home:0,End:60,PageUp:minute+5,PageDown:minute-5};
+ const keys={ArrowLeft:minute-1,ArrowRight:minute+1,ArrowDown:minute-1,ArrowUp:minute+1,Home:0,End:duration,PageUp:minute+5,PageDown:minute-5};
  if(Object.hasOwn(keys,e.key)){e.preventDefault();seek(keys[e.key])}
 };
 function domainReadings({at,compute,load,battery}){
@@ -352,12 +358,14 @@ function renderStudy(id,minute,bands){
   metric.selectedIndex=choices[domain]<rows.length?choices[domain]:0;metric.dataset.domain=domain;
  }
  const j=metric.selectedIndex,[label,,unit]=rows[j];
- // The scenario inputs and domain readings interpolate linearly over this hour.
- const ends=[id,ref].map(key=>[0,60].map(m=>Number(domainReadings(sample(key,m))[index][1][j][1])));
+ // Phase boundaries keep both axes stable as the traces grow.
+ const knots=[0,60,120,duration];
+ const valueAt=(key,m)=>Number(domainReadings(sample(key,m))[index][1][j][1]);
+ const ends=[id,ref].map(key=>knots.map(m=>valueAt(key,m)));
  const svg=byId('trend'),w=Math.max(240,svg.clientWidth),left=55,right=w-22,top=27,bottom=147;
  const low=Math.min(...ends.flat()),high=Math.max(...ends.flat()),pad=(high-low)*.14||Math.max(.1,Math.abs(high)*.05);
- const y=v=>bottom-(v-low+pad)*(bottom-top)/(high-low+2*pad),x=left+(right-left)*minute/60;
- svg.setAttribute('viewBox','0 0 '+w+' 176');svg.setAttribute('aria-label',label+' in '+unit+' from 14:00 to 15:00 MST. At '+time(minute)+', selected '+rows[j][1]+', comparison '+refRows[j][1]+'.');
+ const y=v=>bottom-(v-low+pad)*(bottom-top)/(high-low+2*pad),xAt=m=>left+(right-left)*m/duration,x=xAt(minute);
+ svg.setAttribute('viewBox','0 0 '+w+' 176');svg.setAttribute('aria-label',label+' in '+unit+' from 14:00 to 17:00 MST. At '+time(minute)+', selected '+rows[j][1]+', comparison '+refRows[j][1]+'.');
  svg.replaceChildren();
  function draw(tag,attrs,content){
   const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
@@ -370,16 +378,18 @@ function renderStudy(id,minute,bands){
   draw('text',{x:left-7,y:y(value)+4,'text-anchor':'end'},value);
  }
  draw('line',{x1:x,x2:x,y1:top,y2:bottom,stroke:'#42554c','stroke-dasharray':'2 4'});
- ends.forEach(([start,end],i)=>{
-  draw('line',{x1:left,x2:right,y1:y(start),y2:y(end),class:'trace trace-'+i});
-  draw('circle',{cx:x,cy:y(start+(end-start)*minute/60),r:i?3:5,class:'dot dot-'+i});
+ const elapsed=knots.filter(m=>m<minute).concat(minute);
+ [id,ref].forEach((key,i)=>{
+  const points=elapsed.map(m=>xAt(m)+','+y(valueAt(key,m))).join(' ');
+  draw('polyline',{points,class:'trace trace-'+i});
+  draw('circle',{cx:x,cy:y(valueAt(key,minute)),r:i?3:5,class:'dot dot-'+i});
  });
- draw('text',{x:left,y:171},'14:00');draw('text',{x:right,y:171,'text-anchor':'end'},'15:00 MST');
+ knots.forEach(m=>draw('text',{x:xAt(m),y:171,'text-anchor':m===0?'start':m===duration?'end':'middle'},time(m)));
 }
 function render(){
  const minute=Number(slider.value),id=selector.value;
  const frame=sample(id,minute),{end,at,load,battery}=frame;
- drawDesert(id,minute/5);
+ drawDesert(id,intensity(id,minute));
  byId('grid').hidden=lab;byId('lab').hidden=!lab;
  byId('opsTab').setAttribute('aria-pressed',String(!lab));byId('labTab').setAttribute('aria-pressed',String(lab));
  document.querySelector('h1').textContent=lab?'Scenario Lab':'City Operations';
@@ -391,7 +401,7 @@ function render(){
  for(const button of byId('domainBar').children)button.setAttribute('aria-pressed',button.value===domain);
  if(lab && domain==='energy'){
   byId('balance').textContent=load.toFixed(1)+' MW load − '+at('solar').toFixed(1)+' MW solar − '+(load-at('solar')-battery).toFixed(1)+' MW imports = '+battery.toFixed(1)+' MW required from storage.';
-  const series=Array.from({length:61},(_,m)=>sample(id,m));
+  const series=Array.from({length:duration+1},(_,m)=>sample(id,m));
   drawChart(designs.map(d=>dispatch(d,series,minute)),minute);
  }
  const bands=domainReadings(frame);
@@ -407,7 +417,7 @@ function render(){
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
  byId('clock').textContent=time(minute)+' MST';
  byId('reportState').textContent=end.name+' · '+byId('clock').textContent;
- byId('note').textContent=end.note;
+ byId('note').textContent=minute<=60?end.note:minute<=120?'The model holds the 15:00 conditions through 16:00 MST.':(id==='heat'||id==='dust')?'The modeled event eases toward normal summer conditions by 17:00 MST.':'Seasonal conditions hold at the modeled 15:00 levels through 17:00 MST.';
  byId('basis').textContent='Design basis · '+design.population.toLocaleString('en-US')+' residents · '+design.homes.toLocaleString('en-US')+' homes · '+design.gpcd+' GPCD · '+averageDemand+' MGD average demand · '+Math.round(design.cityPeak+design.itLoad*design.peakPue)+' MW combined planning peak';
  let hash='#scenario='+selector.value+'&step='+Math.floor(minute/5);
  if(minute%5)hash+='&minute='+minute;
@@ -439,9 +449,9 @@ const landscapes={
  fall:['#c7a7ae','#f3ccaa','#b59291','#C7733E','#aa705c','#806677'],
  winter:['#BBDCEB','#F3F6F2','#9aaeba','#829ba6','#64859C','#526978']
 };
-function drawDesert(id,step){
+function drawDesert(id,t){
  const {ctx,w,h}=surface(byId('horizon'));
- const t=step/12,heat=id==='heat'?t:0,dust=id==='dust'?t:0;
+ const heat=id==='heat'?t:0,dust=id==='dust'?t:0;
  const colors=landscapes[id]||landscapes.summer;
  const sky=ctx.createLinearGradient(0,0,0,h*.62);
  sky.addColorStop(0,colors[0]);sky.addColorStop(1,colors[1]);
@@ -539,9 +549,9 @@ window.addEventListener('afterprint',()=>report(wasReport));
 document.querySelector('nav').onpointermove=e=>{if(!still.matches&&timer){const nav=e.currentTarget;nav.style.setProperty('--shine',100*(e.clientX-nav.getBoundingClientRect().left)/nav.clientWidth+'%')}};
 window.addEventListener('resize',render);
 let timer;
-function stop(){clearInterval(timer);timer=null;play.textContent=Number(slider.value)===60?'Replay':'Play'}
+function stop(){clearInterval(timer);timer=null;play.textContent=Number(slider.value)===duration?'Replay':'Play'}
 function update(){stop();render()}
-selector.onchange=()=>{slider.value=60;update()}; slider.oninput=update;
-play.onclick=()=>{if(timer){stop();return}if(Number(slider.value)===60)slider.value=0;render();play.textContent='Pause';timer=setInterval(()=>{slider.value=Math.min(60,Number(slider.value)+5);render();if(Number(slider.value)===60)stop()},900)};
+selector.onchange=()=>{slider.value=0;update()}; slider.oninput=update;
+play.onclick=()=>{if(timer){stop();return}if(Number(slider.value)===duration)slider.value=0;render();play.textContent='Pause';timer=setInterval(()=>{slider.value=Math.min(duration,Number(slider.value)+1);render();if(Number(slider.value)===duration)stop()},240)};
 update();
 </script></main></body></html>
