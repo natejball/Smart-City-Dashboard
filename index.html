@@ -5,8 +5,51 @@
 *{box-sizing:border-box}body{margin:0;background:#f4f1e9;color:#183832;font:16px "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:28px clamp(16px,4vw,56px)}header{border-bottom:2px solid #24544b;padding-bottom:16px}.mast,footer{font:600 12px Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}.mast{color:#41625a}h1{font:normal clamp(36px,5vw,66px) Georgia,serif;letter-spacing:-.045em;margin:10px 0}header p{margin:0}nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#183e36;color:white;padding:16px;border-radius:6px;margin:18px 0 0}label{display:flex;align-items:center;gap:8px}select,button{font:inherit;padding:6px 10px;border:1px solid #9cb8ad;border-radius:4px;background:white;color:#183832}button{cursor:pointer}input{accent-color:#efb67d;width:100px}#note{min-height:1.5em;color:#435951}#grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}article{background:#fffefa;border:1px solid #cccfc1;border-top:4px solid #588476;padding:16px;border-radius:5px}article:nth-child(3n+2){border-top-color:#be864e}h2{font:normal 24px Georgia,serif;margin:0 0 12px}dl{margin:0}dl div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #e6e7de}dt{font-size:14px}dd{margin:0;font:600 18px Consolas,monospace;white-space:nowrap}small{font:12px "Segoe UI",sans-serif}summary{cursor:pointer;font-size:13px;color:#346052;margin-top:8px}details p{font-size:14px}footer{margin-top:16px;line-height:1.6}@media(max-width:900px){#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){#grid{grid-template-columns:1fr}nav label{flex-wrap:wrap}}@media print{@page{size:landscape;margin:8mm}main{padding:0}#grid{grid-template-columns:repeat(3,1fr)}details,button, input{display:none}article{break-inside:avoid}*{print-color-adjust:exact}}
 #tabs{display:flex;gap:6px;margin-bottom:12px}#tabs button[aria-pressed=true]{background:#183e36;color:white}#lab h2{margin-top:16px}.designs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px}.designs label{display:flex;justify-content:space-between;margin:10px 0}.designs select{width:100px}.result{font:600 22px Georgia,serif;color:#184f40;border-top:1px solid #ccd5c8;padding-top:14px}.chart{overflow-x:auto}.chart canvas{width:100%;height:auto;max-height:235px;background:#fffefa;border:1px solid #c9cfc3}#lab{background:linear-gradient(130deg,#e0ebe4,#f6ead7);padding:20px;border-radius:8px}article{background:rgba(255,254,250,.92)}[hidden]{display:none!important}
 main{position:relative}header{position:relative;isolation:isolate;overflow:hidden;border-radius:12px 12px 0 0;padding:26px clamp(14px,3vw,36px) 65px;background:#e4d7be}#horizon{position:absolute;inset:0;width:100%;height:100%;z-index:-2}header:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#fff5dfed,transparent 79%)}nav{position:relative;margin:-38px 12px 12px;border:1px solid #ffffffba;background:linear-gradient(125deg,#173d35e8,#36594dcf 55%,#55716ad9);backdrop-filter:blur(16px) saturate(1.4);box-shadow:inset 0 1px 2px #ffffff9c,0 4px 12px #213b3024;border-radius:14px}nav:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(ellipse at var(--shine,20%) 0%,#ffffff28,transparent 45%)}.pack{width:100%;height:156px;display:block;background:radial-gradient(ellipse at 50% 86%,#42645b,#1a3631 76%);border-radius:9px}.pack-info{font:600 14px Consolas,monospace;margin:8px 0}.pack-meter{width:100%;accent-color:#207767}.rotate{font-size:13px;margin:2px 0 8px}body.capture nav,body.capture #tabs,body.capture #capture,body.capture .rotate,body.capture #share{display:none}body.capture header{padding-bottom:24px}body.capture article{background:#fffefa}@media print{nav,#tabs,#capture,.rotate{display:none!important}header{padding-bottom:20px}}@media(max-width:600px){nav{margin-left:3px;margin-right:3px}}
-</style></head><body><main>
-<div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button><button id="capture">Report view</button></div><header><canvas id="horizon" aria-hidden="true"></canvas><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p></header>
+
+/* Shared landscape and reading surfaces */
+body{isolation:isolate;background:#e6dbc7;color:#172e2a}
+main{padding-top:18px}
+#horizon{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
+header{background:transparent;border:0;border-radius:0;isolation:auto;overflow:visible;padding:26px 0 18px}
+header:after,nav:before{display:none}
+header h1,header p,.mast{text-shadow:0 1px 7px #fff9df}
+#tabs{flex-wrap:wrap}
+nav,.designs article{background:rgba(248,248,237,.57);color:#142e29;border:1px solid #ffffffa3;border-top:1px solid #fffffff2;box-shadow:0 3px 14px #24332f20,inset 0 1px #ffffff5c;backdrop-filter:blur(4px);border-radius:12px}
+nav{margin:4px 0 12px;padding:12px 16px}
+select,button{background:#fffef5dc;border-color:#667971;color:#142e29}
+option{background:#fffdf5;color:#142e29}
+:focus-visible{outline:3px solid #003e80;outline-offset:3px}
+input[type=range]{accent-color:#165a50}
+#lab{background:transparent;padding:0}
+#note,#balance,#lab>h2,#lab>p,#basis,main>details,#lab>details{background:#fbf9eff0;color:#1a332e;border-radius:5px;padding:7px 12px;width:fit-content;max-width:100%}
+#lab>h2{margin-bottom:6px}
+#lab>p{margin:6px 0 12px}
+.designs{gap:clamp(18px,3vw,48px)}
+.designs article{padding:14px 18px}
+.designs article h2{margin:0 0 8px!important}
+.designs select{width:110px}
+.pack-info,.designs article>div{background:#faf9efed;padding:8px;border-radius:5px}
+.designs article>div p{margin:5px 0}
+.result{border:0;padding:0}
+.report-state,.settings-summary{display:none}
+@supports not (backdrop-filter:blur(4px)){nav,.designs article{background:#f1eee0e8}}
+body.capture{background:#fff}
+.capture main{max-width:1080px;padding:10px 16px;background:#fff}
+.capture header{position:relative;isolation:isolate;overflow:hidden;background:#ead9c3;padding:12px 18px;border-radius:6px}
+.capture #horizon{position:absolute}
+.capture header:after{display:block;background:linear-gradient(90deg,#fff8eaf5,#fff6e0a8 49%,transparent)}
+.capture h1{font-size:34px;margin:3px 0}
+.capture .report-state,.capture .settings-summary{display:block;font-weight:650}
+.capture .designs label,.capture details,.capture #copied{display:none}
+.capture .designs article{background:#fffefa;backdrop-filter:none;box-shadow:none;border:1px solid #bcc8c1}
+.capture .pack{height:90px}
+.capture .chart canvas{height:125px}
+.capture #restore{position:fixed;right:8px;bottom:8px;z-index:2}
+.capture #note,.capture #balance,.capture #basis{margin:6px 0}
+@media(max-width:600px){main{padding:12px}header{padding:14px 0}nav{gap:10px}#tabs button{padding:6px 8px}.designs{grid-template-columns:1fr}}
+@media print{body.capture main{max-width:none;padding:0}#restore{display:none!important}.capture .designs{grid-template-columns:1fr 1fr}.capture article{padding:10px}.capture #grid{gap:8px}.capture footer{font-size:10px}}
+</style></head><body><canvas id="horizon" aria-hidden="true"></canvas><main>
+<div id="tabs" aria-label="Workspace"><button id="opsTab">City Operations</button><button id="labTab">Scenario Lab</button><button id="capture">Report view</button></div><header><div class="mast">Belmont Systems Consortium &nbsp; / &nbsp; Phase 1 master plan</div><h1>City Operations</h1><p>West Valley, Arizona &nbsp;·&nbsp; Simulated telemetry &nbsp;·&nbsp; Provisional design values</p><p class="report-state" id="reportState"></p></header>
 <nav aria-label="Simulation controls"><label>Scenario <select id="scenario"></select></label><label>Event progression <input id="phase" type="range" min="0" max="12" value="12"></label><output id="clock"></output><button id="play">Replay</button></nav>
 <button id="restore" hidden>Exit report view</button><p id="note"></p><section id="grid" aria-label="Six operational domains"></section><section id="lab" hidden><h2>Battery design comparison</h2><p id="balance"></p><div class="designs" id="designs"></div><h2>Unmet demand over the hour</h2><p>Design A · solid teal &nbsp; / &nbsp; Design B · dashed rust</p><div class="chart"><canvas id="chart" width="880" height="220" aria-label="Unmet power in megawatts. Exact results are listed above."></canvas></div><details><summary>Dispatch method and assumptions</summary><p>Solar serves demand first, then grid imports up to 140 MW. Batteries discharge into the remaining gap. Each minute uses the power at the end of that minute for energy accounting. Usable MWh is deliverable AC energy. The model assumes no recharge, reserve requirement, or ramp delay during the hour. First shortfall times have one-minute resolution. The vertical cursor marks the selected time.</p></details><button id="share">Copy experiment link</button><span id="copied" role="status"></span></section><footer id="basis"></footer><details><summary>Planning assumptions and sources</summary><p>The 455 MW municipal peak scales Tucson Electric Power’s 2025 retail peak to Belmont’s population. One 40 MW IT facility at an assumed hot-hour PUE of 1.34 adds 53.6 MW. The combined 508.6 MW peak rounds to 509 MW. Seasonal weather and operating values are illustrative. The model assumes 300 MW of installed solar. <a href="https://www.sec.gov/Archives/edgar/data/100122/000010012226000006/tep-20251231.htm">TEP annual report</a> · <a href="https://www.ironmountain.com/data-centers/locations/na/phoenix/azp-2">Phoenix IT capacity reference</a></p></details>
 <script>
@@ -47,7 +90,7 @@ const designs=['A','B'].map((name,i)=>{
  const controls=options.map(([label,values],j)=>{
   const field=document.createElement('label'), select=document.createElement('select');
   field.textContent=label;
-  values.forEach(v=>select.add(new Option(v,v)));
+  values.forEach(v=>select.add(new Option(v+[' MW',' MWh','%'][j],v)));
   const key=name+j, stored=saved.get(key);
   select.value=stored!==null && values.includes(Number(stored))?Number(stored):[[100,100,100],[150,100,100]][i][j];
   select.onchange=()=>{select.dataset.changed='1';render()};field.append(select);card.append(field);return select;
@@ -56,13 +99,15 @@ const designs=['A','B'].map((name,i)=>{
  const info=document.createElement('p');info.className='pack-info';
  const meter=document.createElement('progress');meter.className='pack-meter';meter.setAttribute('aria-label','Instantaneous discharge relative to rating');
  const rotate=document.createElement('button');rotate.className='rotate';rotate.textContent='Rotate enclosure';
- card.append(pack,info,meter,rotate);
+ const summary=document.createElement('p');summary.className='settings-summary';
+ card.append(summary,pack,info,meter,rotate);
  const view={angle:-0.52};rotate.onclick=()=>{view.angle+=Math.PI/6;render()};
  const output=document.createElement('div');card.append(output);byId('designs').append(card);
- return {name,controls,output,pack,info,meter,view};
+ return {name,controls,summary,output,pack,info,meter,view};
 });
 function dispatch(designCase,series,cursor){
  const [power,capacity,charge]=designCase.controls.map(el=>Number(el.value));
+ designCase.summary.textContent=power+' MW · '+capacity+' MWh · '+charge+'% starting charge';
  let remaining=capacity*charge/100,unserved=0,first=null,peak=0;
  const gaps=[];let current;
  series.forEach((s,m)=>{
@@ -119,6 +164,7 @@ function render(){
  }
  bands.forEach(([,rows],i)=>rows.forEach(([,value,unit],j)=>{grid.children[i].querySelectorAll('dd')[j].innerHTML=value+' <small>'+unit+'</small>'}));
  byId('clock').textContent=(step===12?'15:00':'14:'+String(step*5).padStart(2,'0'))+' MST';
+ byId('reportState').textContent=end.name+' · '+byId('clock').textContent;
  byId('note').textContent=end.note;
  byId('basis').textContent='Design basis · '+design.population.toLocaleString('en-US')+' residents · '+design.homes.toLocaleString('en-US')+' homes · '+design.gpcd+' GPCD · '+averageDemand+' MGD average demand · '+Math.round(design.cityPeak+design.itLoad*design.peakPue)+' MW combined planning peak';
  let hash='#scenario='+selector.value+'&step='+step;
@@ -139,25 +185,77 @@ function face(ctx,points,color){
  ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=color;ctx.fill();
 }
 const still=matchMedia('(prefers-reduced-motion: reduce)');
+// Each frame is a pure projection of the selected scenario and five-minute step.
+const landscapes={
+ spring:['#BCE2DD','#f0eac3','#94ada2','#709780','#567764','#435f51'],
+ summer:['#68B9CA','#f8dfad','#d6af7f','#bd8b64','#a77153','#78543e'],
+ fall:['#c7a7ae','#f3ccaa','#b59291','#C7733E','#aa705c','#806677'],
+ winter:['#BBDCEB','#F3F6F2','#9aaeba','#829ba6','#64859C','#526978']
+};
 function drawDesert(id,step){
- const {ctx,w,h}=surface(byId('horizon')),t=still.matches?0:step/12;
- const dust=id==='dust',hot=id==='heat';
- const sky=ctx.createLinearGradient(0,0,0,h);
- sky.addColorStop(0,id==='winter'?'#8eb2c2':'#96b9bb');sky.addColorStop(.67,hot?'#f7c996':'#f3d6ac');sky.addColorStop(1,'#ba8063');
+ const {ctx,w,h}=surface(byId('horizon'));
+ const t=step/12,heat=id==='heat'?t:0,dust=id==='dust'?t:0;
+ const colors=landscapes[id]||landscapes.summer;
+ const sky=ctx.createLinearGradient(0,0,0,h*.62);
+ sky.addColorStop(0,colors[0]);sky.addColorStop(1,colors[1]);
  ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
- ctx.fillStyle='#fff0c4';ctx.beginPath();ctx.arc(w*(.78+t*.012),h*.24,h*.095,0,2*Math.PI);ctx.fill();
- // Project ridges in layers. Adjacent triangular facets share their vertices.
- for(let layer=0;layer<4;layer++){
-  const pts=[],base=h*(.50+layer*.12);
-  for(let i=-1;i<=41;i++){
-   const noise=Math.sin(i*.49+layer*2)+.44*Math.cos(i*1.83+layer)+.28*Math.sin(i*2.72);
-   const shimmer=hot?Math.sin(t*11+i)*t*1.5:0;
-   pts.push([i*w/40,base-noise*h*(.052+layer*.008)+shimmer]);
-  }
-  face(ctx,[...pts,[w,h],[0,h]],['#ad9f96','#a98375','#8b7161','#746453'][layer]);
-  for(let i=1;i<pts.length;i++)face(ctx,[pts[i-1],pts[i],[(pts[i][0]+pts[i-1][0])/2+8,base+h*.20]],'rgba(62,48,45,'+(.04+.09*Math.abs(Math.sin(i*3+layer)))+')');
+ const glow=ctx.createLinearGradient(0,h*.05,0,h*.65);
+ glow.addColorStop(0,'rgba(255,148,111,0)');glow.addColorStop(1,'#D94C36');
+ ctx.globalAlpha=heat*.89;ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);ctx.globalAlpha=1;
+ const sx=w*(.73+.09*t),sy=h*(.18+.05*t),radius=Math.min(w,h)*.038;
+ const halo=ctx.createRadialGradient(sx,sy,radius,sx,sy,radius*(3+heat*4));
+ halo.addColorStop(0,'#fff0bca8');halo.addColorStop(1,'#fff0bc00');
+ ctx.fillStyle=halo;ctx.fillRect(0,0,w,h);
+ ctx.fillStyle='#fff3cd';ctx.beginPath();ctx.arc(sx,sy,radius,0,2*Math.PI);ctx.fill();
+ if(id==='winter'){
+  ctx.fillStyle='#f3f6f2b3';
+  for(let i=0;i<8;i++){ctx.beginPath();ctx.ellipse(w*((i*.31+t*.19)%1),h*(.11+i%3*.064),w*.13,h*.011,-.03,0,2*Math.PI);ctx.fill()}
  }
- if(dust){const front=w*(1.12-.83*(still.matches ? 0.65 : t));for(let i=0;i<16;i++){const x=front+i*w*.058,y=h*(.54+.13*Math.sin(i*2)),r=h*(.43+.1*Math.cos(i));const cloud=ctx.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,'#b38b54db');cloud.addColorStop(1,'#b38b5400');ctx.fillStyle=cloud;ctx.fillRect(x-r,y-r,2*r,2*r)}}
+ const spacing=Math.max(20,Math.min(w/30,window.innerHeight*.08)),count=Math.ceil(w/spacing)+2;
+ for(let layer=0;layer<4;layer++){
+  const points=[],base=h*(.45+layer*.135);
+  for(let i=-1;i<count;i++){
+   const relief=Math.sin(i*.46+layer*2)+.46*Math.cos(i*1.35+layer)+.19*Math.sin(i*2.72);
+   points.push([i*spacing,base-relief*h*(.060-layer*.009)+heat*layer*Math.sin(i*2+t*16)*h*.002]);
+  }
+  face(ctx,[...points,[w,h],[0,h]],colors[layer+2]);
+  for(let i=1;i<points.length;i++){
+   const a=points[i-1],b=points[i],depth=h*(.10+.08*Math.abs(Math.sin(i+layer)));
+   const shadow=id==='fall'?.18+t*.2:.13;
+   face(ctx,[a,b,[a[0]+spacing*(id==='fall'?1+t:1.3),base+depth]],b[1]>a[1]?'rgba(60,35,48,'+shadow+')':'rgba(255,225,177,.13)');
+  }
+  if(heat){ctx.globalAlpha=heat*(.10+layer*.08);face(ctx,[...points,[w,h],[0,h]],'#922F3B');ctx.globalAlpha=1;
+   for(let band=0;band<3;band++){const y=base+h*(.018+band*.026);ctx.drawImage(ctx.canvas,0,y*ctx.canvas.height/h,ctx.canvas.width,3,Math.sin(t*14+band)*heat*3,y,w,2)}
+  }
+  if(dust){
+   const front=w*(1.36-1.58*t);
+   // A continuous soft front with a changing outline, shared across the viewport.
+   const strip=Math.max(2,Math.ceil(h/160));
+   ctx.globalAlpha=dust*[1,.76,.48,.22][layer];
+   for(let y=0;y<h;y+=strip){
+    const phase=y/h*7+t;
+    const edge=front+w*(.052*Math.sin(phase)+.018*Math.cos(phase*2.7));
+    const haze=ctx.createLinearGradient(edge-w*.12,0,edge+w*.2,0);
+    haze.addColorStop(0,'#c99a5500');haze.addColorStop(.48,'#c99a55b5');haze.addColorStop(1,'#997047');
+    ctx.fillStyle=haze;ctx.fillRect(0,y,w,strip);
+   }
+   ctx.globalAlpha=1;
+  }
+ }
+ // Saguaros and small foreground plants give the basin a visible sense of scale.
+ for(let i=0;i<count;i++){
+  const x=i*spacing+Math.sin(i*37)*spacing*.4,y=h*(.91+.075*Math.sin(i*17));
+  const size=Math.min(h*.038,22)*(1+.35*Math.sin(i*11));
+  ctx.strokeStyle=colors[5];ctx.lineCap='round';
+  if(i%5===2){ctx.lineWidth=size*.21;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-size*1.8);
+   ctx.moveTo(x,y-size*.65);ctx.quadraticCurveTo(x-size*.5,y-size*.5,x-size*.5,y-size*1.19);
+   ctx.moveTo(x,y-size);ctx.quadraticCurveTo(x+size*.4,y-size*.9,x+size*.4,y-size*1.42);ctx.stroke()}
+  else{for(let j=-2;j<=2;j++){
+   const tip=x+j*size*.26+(id==='spring'?size*.25*Math.sin(i+t*7):0),top=y-size*(.35+.1*Math.cos(j));
+   ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(tip,top);ctx.stroke();
+   if(id==='spring'){ctx.fillStyle='#EAC65A';ctx.fillRect(tip-1,top-1,3,2)}
+  }}
+ }
 }
 function drawPack(canvas,angle,charge){
  const {ctx,w,h}=surface(canvas),scale=Math.min(w/8,h/3.7);
@@ -179,7 +277,17 @@ function drawPack(canvas,angle,charge){
  }
  faces.sort((a,b)=>a.depth-b.depth).forEach(f=>face(ctx,f.points,f.color));
 }
-function report(on){stop();document.body.classList.toggle('capture',on);byId('restore').hidden=!on;render()}
+function report(on){
+ stop();
+ const horizon=byId('horizon');
+ (on?document.querySelector('header'):document.body).prepend(horizon);
+ document.body.classList.toggle('capture',on);
+ byId('restore').hidden=!on;
+ render();
+}
+let wasReport;
+window.addEventListener('beforeprint',()=>{wasReport=document.body.classList.contains('capture');report(true)});
+window.addEventListener('afterprint',()=>report(wasReport));
 byId('capture').onclick=()=>report(true);byId('restore').onclick=()=>report(false);
 document.querySelector('nav').onpointermove=e=>{if(!still.matches&&timer){const nav=e.currentTarget;nav.style.setProperty('--shine',100*(e.clientX-nav.getBoundingClientRect().left)/nav.clientWidth+'%')}};
 window.addEventListener('resize',render);
