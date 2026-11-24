@@ -115,7 +115,7 @@ body.capture{background:#fff}
 <section id="lab" hidden><div id="domainBar" role="group" aria-label="Lab domains"></div><label id="referenceControl">Compare with <select id="compare"></select></label>
 <section id="overview" hidden><h2 id="overviewTitle">Scenario overview</h2>
 <table><thead><tr><th scope="col">Domain metric</th><th scope="col" id="overviewCurrent"></th><th scope="col" id="overviewRef"></th></tr></thead><tbody id="overviewRows"></tbody></table></section>
-<section id="energyStudy"><h2>Battery design comparison</h2><p id="balance"></p><section class="chart" id="purchases"><h3>Supplemental grid purchases</h3>
+<section id="energyStudy"><h2>Battery design comparison</h2><button type="button" id="labOpenBuilder">Design a battery</button><p id="balance"></p><section class="chart" id="purchases"><h3>Supplemental grid purchases</h3>
 <label>Extra import capacity <select id="extraImport"><option value="0">Off · existing grid only</option><option value="25">25 MW</option><option value="50">50 MW</option><option value="100">100 MW</option><option value="full">Cover all remaining demand</option></select></label>
 <p>Both designs use solar, up to 140 MW of base imports, then battery discharge. Extra imports cover any remaining shortfall up to the selected limit. This experiment assumes the additional transmission capacity is available.</p>
 <details><summary>Price basis · $31.36/MWh</summary><p>Purchases use the 2025 average on-peak day-ahead wholesale price at the Palo Verde hub. The estimate covers supplemental energy only. Delivery, losses, capacity charges and scarcity premiums are excluded. Actual hourly prices and available import capacity can differ. <a href="https://www.ferc.gov/sites/default/files/2026-03/26_State-of-the-Market_0324_1430.pdf" target="_blank" rel="noopener">FERC 2025 State of the Markets, Figure 30</a></p></details></section><div class="designs" id="designs"></div><h2>Battery sizing experiment</h2><div class="chart sizing"><p id="sizingNote"></p>
@@ -621,7 +621,7 @@ function render(){
    article.innerHTML='<h2>'+name+'</h2><dl>'+rows.map(([label])=>'<div><dt>'+label+'</dt><dd></dd></div>').join('')+'</dl><details><summary>Metric notes</summary><p>'+info+'</p></details>';
    if(name==='Energy'){
     const open=document.createElement('button');open.id='openBuilder';open.textContent='Design a battery';article.append(open);
-    open.onclick=()=>{building=true;lab=false;listBatteries();update();byId('bdName').focus()};
+    open.onclick=openBatteryDesigner;
    }
    grid.append(article);
  }
@@ -643,6 +643,8 @@ function render(){
  for(const d of designs)if(d.custom)hash+='&'+d.name+'design='+encodeURIComponent(JSON.stringify(d.custom));
  if(location.hash!==hash) location.replace(hash);
 }
+function openBatteryDesigner(){building=true;lab=false;listBatteries();update();byId('bdName').focus()}
+byId('labOpenBuilder').onclick=openBatteryDesigner;
 byId('testLoad').onclick=()=>{domain='energy';lab=true;update();byId('labTab').focus()};
 byId('opsTab').onclick=()=>{building=false;lab=false;update()};
 byId('labTab').onclick=()=>{if(!lab)domain=building?'energy':'overview';building=false;lab=true;update()};
